@@ -5,64 +5,10 @@
     <track>true</track>
     <users>
         <user>
-            <name>管理员2</name>
-            <serverPort>11002</serverPort>
-            <method>chacha20-ietf</method>
-            <password>cheung_shadow-socks</password>
-        </user>
-        <user>
-            <name>test3</name>
-            <serverPort>11003</serverPort>
-            <method>chacha20-ietf</method>
-            <password>admin123456</password>
-        </user>
-        <user>
-            <name>桂熙轩</name>
-            <serverPort>11004</serverPort>
-            <method>chacha20-ietf</method>
-            <password>gxx123456</password>
-        </user>
-        <user>
-            <name>陈长权</name>
-            <serverPort>11005</serverPort>
-            <method>chacha20-ietf</method>
-            <password>ccq123456</password>
-        </user>
-        <user>
-            <name>龚文艺</name>
-            <serverPort>11006</serverPort>
-            <method>chacha20</method>
-            <password>gwy123456</password>
-        </user>
-        <user>
-            <name>杨洪</name>
-            <serverPort>11007</serverPort>
-            <method>chacha20-ietf</method>
-            <password>yh1234567</password>
-        </user>
-        <user>
-            <name>test8</name>
-            <serverPort>11008</serverPort>
-            <method>chacha20-ietf</method>
-            <password>admin123456</password>
-        </user>
-        <user>
-            <name>刘俊辉</name>
-            <serverPort>11009</serverPort>
-            <method>chacha20-ietf</method>
-            <password>ljh123456</password>
-        </user>
-        <user>
-            <name>温荔锋</name>
-            <serverPort>11010</serverPort>
-            <method>chacha20-ietf</method>
-            <password>wlf123456</password>
-        </user>
-        <user>
-            <name>管理员1</name>
-            <serverPort>16888</serverPort>
-            <method>chacha20-ietf</method>
-            <password>admin123456</password>
+            <name>test1</name>
+            <serverPort>1080</serverPort>
+            <method>aes-256-cfb</method>
+            <password>000000</password>
         </user>
     </users>
 </config>
