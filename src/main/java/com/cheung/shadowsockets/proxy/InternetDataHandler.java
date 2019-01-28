@@ -3,7 +3,6 @@ package com.cheung.shadowsockets.proxy;
 import com.cheung.shadowsockets.encryption.CryptUtil;
 import com.cheung.shadowsockets.encryption.ICrypt;
 import com.cheung.shadowsockets.model.SSModel;
-import com.cheung.shadowsockets.pool.CommonResources;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,6 +10,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,11 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-        Attribute<ChannelHandlerContext> channelAttribute = ctx.channel().attr(CommonResources.SERVER_CHANNEL);
-        Attribute<SSModel> ssModelAttribute = channelAttribute.get().channel().attr(CommonResources.SS_MODEL);
+        AttributeKey<ChannelHandlerContext> serverChannel = AttributeKey.valueOf("server.channel");
+        AttributeKey<SSModel> ssModel = AttributeKey.valueOf("ss.model");
+
+        Attribute<ChannelHandlerContext> channelAttribute = ctx.channel().attr(serverChannel);
+        Attribute<SSModel> ssModelAttribute = channelAttribute.get().channel().attr(ssModel);
 
         this.clientProxyChannel = channelAttribute.get();
         this._crypt = ssModelAttribute.get().getCrypt();

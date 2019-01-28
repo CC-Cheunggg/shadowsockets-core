@@ -1,6 +1,5 @@
 package com.cheung.shadowsockets;
 
-import com.cheung.shadowsockets.pool.CommonResources;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;

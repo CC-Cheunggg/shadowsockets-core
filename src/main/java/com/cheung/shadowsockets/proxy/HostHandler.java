@@ -6,16 +6,13 @@ import com.cheung.shadowsockets.encryption.CryptFactory;
 import com.cheung.shadowsockets.encryption.CryptUtil;
 import com.cheung.shadowsockets.encryption.ICrypt;
 import com.cheung.shadowsockets.groovy.GroovyUtils;
+import com.cheung.shadowsockets.utils.BootContext;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.socks.SocksAddressType;
-import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -29,11 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.nio.charset.Charset;
-
-import static com.cheung.shadowsockets.pool.CommonResources.eventExecutors;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 4次握手中的connect阶段，接受shadowsocks-netty发送给shadowsocks-netty-server的消息
@@ -144,13 +137,13 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
 
         try {
             String codeText = GroovyUtils.readCodeTextInputStream(ClassLoader.getSystemResourceAsStream("handler-script.ss"), "UTF-8");
-            String userName = null;
+            AtomicReference<String> userName = new AtomicReference<>();
             if (isTrack) {
 
                 // 为了便于查询故障
                 String userAddress = ctx.channel().localAddress().toString();
                 int userPort = Integer.parseInt(userAddress.substring(userAddress.indexOf(":") + 1, userAddress.length()));
-                userName = ConfigXmlLoader.loader.getUserMapper().get(userPort);
+                userName.set(ConfigXmlLoader.loader.getUserMapper().get(userPort));
 
             }
 
@@ -207,40 +200,16 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
                 host = Inet6Address.getByAddress(hostBytes).toString().substring(1);
                 port = dataBuff.readShort();
             } else {
-                addBlacklist(ctx);
-                if (checkHeartbeatPacket(addressType)) {
-                    logger.info("HeartbeatPacket: {} ,HeartbeatPacket :{} ,HeartbeatPacket Hex:{}", dataBuff.toString(Charset.forName("utf-8"))
-                            , dataBuff.readableBytes(), ByteBufUtil.hexDump(dataBuff));
-                    ReferenceCountUtil.safeRelease(dataBuff);
-                    ctx.pipeline().addLast("httpResponseEncoder", new HttpResponseEncoder());
-                    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.EMPTY_BUFFER);
-                    ctx.channel().writeAndFlush(response).sync();
-                    ctx.pipeline().remove("httpResponseEncoder");
-                    return;
-                }
-
-                // 测试中
-//                if (isTrack) {
-//                    logger.warn(userName + "'s unknown address type: " + addressType + " client address: " + ctx.channel().remoteAddress());
-//                    logger.info("error data: {} ,data length :{} ,hex string :{}", dataBuff.toString(Charset.forName("utf-8"))
-//                            , dataBuff.readableBytes(), ByteBufUtil.hexDump(dataBuff));
-//                } else {
-//                    logger.warn("unknown address type: " + addressType + " client address: " + ctx.channel().remoteAddress());
-//                    logger.info("error data: {} ,data length :{} ,hex string :{}", dataBuff.toString(Charset.forName("utf-8"))
-//                            , dataBuff.readableBytes(), ByteBufUtil.hexDump(dataBuff));
-//                }
-//
-//                ctx.channel().close();
-//                ctx.close();
-
-                GroovyUtils.invokeMethod(codeText, "unknownAddressTypeHandler", ctx, buff, addressType, userName, isTrack);
-                GroovyUtils.clearGroovyClassLoaderCache();
+                // 遇到不完整的包 就释放掉
+                CryptUtil.releaseByteBufAllRefCnt(dataBuff);
+                ctx.close();
                 return;
             }
 
-            GroovyUtils.invokeMethod(codeText, "loggerHandler", ctx, buff, addressTypeString, userName, host, port, isTrack);
+            GroovyUtils.invokeMethod(codeText, "loggerHandler", ctx, buff, addressTypeString, userName.get(), host, port, isTrack);
             GroovyUtils.clearGroovyClassLoaderCache();
 
+            EventLoopGroup eventExecutors = BootContext.getBeanFactory().getBean("eventExecutors", EventLoopGroup.class);
             ctx.channel().pipeline().addLast(eventExecutors, new ClientProxyHandler(host, port, dataBuff, ctx, _crypt));
             ctx.channel().pipeline().remove(this);
 

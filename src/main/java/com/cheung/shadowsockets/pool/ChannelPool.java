@@ -8,16 +8,31 @@ import io.netty.channel.socket.SocketChannel;
 import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.PostConstruct;
+@Deprecated
+//@Component
 public class ChannelPool {
 
-    private final static GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-    private final static AbandonedConfig abandonedConfig = new AbandonedConfig();
-    private final static ClientProxyChannelFactory factory = new ClientProxyChannelFactory();
-    private final static GenericObjectPool<Bootstrap> pool = new GenericObjectPool<>(factory, config, abandonedConfig);
 
-    static {
+    private GenericObjectPool<Bootstrap> pool;
 
+    @Autowired
+    @Qualifier("config")
+    private GenericObjectPoolConfig config;
+
+
+    @Autowired
+    private ClientProxyChannelFactory factory;
+
+    @Autowired
+    @Qualifier("abandonedConfig")
+    private AbandonedConfig abandonedConfig;
+
+    @PostConstruct
+    public void initConfig() {
         abandonedConfig.setRemoveAbandonedOnBorrow(true);
         config.setBlockWhenExhausted(true);
         config.setMaxTotal(2);
@@ -26,10 +41,11 @@ public class ChannelPool {
         config.setLifo(true);
         config.setMinIdle(0);
         config.setMinEvictableIdleTimeMillis(30 * 60 * 1000);// 默认三十分钟
+        pool = new GenericObjectPool<>(factory, config, abandonedConfig);
     }
 
 
-    public static ChannelFuture connect(final String host, final int port, final ChannelInboundHandler inboundHandler) throws Exception {
+    public ChannelFuture connect(final String host, final int port, final ChannelInboundHandler inboundHandler) throws Exception {
         Bootstrap bootstrap = pool.borrowObject();
         ChannelFuture channelFuture = bootstrap
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -40,7 +56,6 @@ public class ChannelPool {
                 }).connect(host, port);
         pool.returnObject(bootstrap);
         return channelFuture;
-
     }
 
 }

@@ -4,19 +4,24 @@ package com.cheung.shadowsockets.pool;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+@Deprecated
+//@Component
 public class ClientProxyChannelFactory extends BasePooledObjectFactory<Bootstrap> {
 
-    private final static EventLoopGroup group = new EpollEventLoopGroup(32);
+    @Autowired
+    @Qualifier("internetEventLoopGroup")
+    private EventLoopGroup internetEventLoopGroup;
 
     @Override
     public Bootstrap create() throws Exception {
-        return new Bootstrap().group(group).channel(EpollSocketChannel.class)
+        return new Bootstrap().group(internetEventLoopGroup)
+                .channel(EpollSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000)
                 .option(ChannelOption.AUTO_READ, true);

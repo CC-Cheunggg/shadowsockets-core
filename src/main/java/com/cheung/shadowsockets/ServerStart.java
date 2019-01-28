@@ -6,9 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.transaction.interceptor.TransactionProxyFactoryBean;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * socksserver启动类
