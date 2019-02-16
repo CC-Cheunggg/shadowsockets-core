@@ -2,13 +2,9 @@ package com.cheung.shadowsockets;
 
 import com.cheung.shadowsockets.config.Config;
 import com.cheung.shadowsockets.config.ConfigXmlLoader;
-import com.cheung.shadowsockets.config.User;
 import com.cheung.shadowsockets.proxy.HostHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +23,8 @@ import java.net.InetAddress;
 public class ShadowsocksServer implements ApplicationListener {
 
     private final ServerBootstrap bootstrap = new ServerBootstrap();
+    private final Config config = ConfigXmlLoader.loader.load();
+
 
     @Autowired
     @Qualifier("bossGroup")
@@ -40,8 +38,10 @@ public class ShadowsocksServer implements ApplicationListener {
     @Qualifier("eventExecutors")
     private EventLoopGroup eventExecutors;
 
+    private final ChannelHandler hostHandler = new HostHandler();
 
-    public void start(Config config, User user) {
+
+    public void start() {
         try {
             bootstrap.group(bossGroup, workerGroup)
                     .channel(EpollServerSocketChannel.class)
@@ -49,24 +49,22 @@ public class ShadowsocksServer implements ApplicationListener {
                     .childOption(ChannelOption.AUTO_READ, true)
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
-            ConfigXmlLoader.loader.addUser(user);
             bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
-                    socketChannel.pipeline().addLast("hostHandler", new HostHandler(user, config.isTrack()));
+                    socketChannel.pipeline().addLast("hostHandler", hostHandler);
                 }
             });
 
             InetAddress inetAddress = InetAddress.getByName(config.getIpAddr());
-            log.info("Started !  Port :" + user.getServerPort() + " Ip :" + inetAddress.getHostAddress());
+            log.info("Started !  Port :" + config.getServerPort() + " Ip :" + inetAddress.getHostAddress());
 
-            ChannelFuture channelFuture = bootstrap.bind(inetAddress, user.getServerPort());
+            ChannelFuture channelFuture = bootstrap.bind(inetAddress, config.getServerPort());
             // 阻塞直到 channel 关闭
             channelFuture.sync().channel().closeFuture().sync();
 
         } catch (Exception e) {
             log.error("start error", e);
-            ConfigXmlLoader.loader.clear();
         } finally {
             stop();
         }
@@ -86,15 +84,10 @@ public class ShadowsocksServer implements ApplicationListener {
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ContextRefreshedEvent) {
-
-            Config config = ConfigXmlLoader.loader.load();
-            User[] users = config.getUsers();
-
-            start(config, users[0]);
+            start();
         }
         if (event instanceof ContextClosedEvent) {
             stop();
         }
-
     }
 }

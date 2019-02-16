@@ -27,11 +27,6 @@
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
-        <SMTP name="mail" subject="Shadowsockets Error Log" to="gu.dangongyuan@163.com" from="gu.dangongyuan@163.com"
-              replyTo="gu.dangongyuan@163.com"
-              smtpProtocol="smtp" smtpHost="smtp.163.com" bufferSize="50" smtpDebug="false"
-              smtpPassword="gudangongyuan" smtpUsername="gu.dangongyuan@163.com">
-        </SMTP>
     </appenders>
 
     <loggers>
@@ -43,7 +38,6 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="trace"/>
             <AppenderRef ref="error"/>
-            <AppenderRef ref="mail"/>
         </AsyncRoot>
     </loggers>
 

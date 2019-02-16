@@ -1,11 +1,9 @@
-package com.cheung.shadowsockets.pool;
+package com.cheung.shadowsockets.common;
 
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
-import org.apache.commons.pool2.impl.AbandonedConfig;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,19 +32,11 @@ public class CommonResourcesConfig {
     }
 
     @Bean
-    public GenericObjectPoolConfig config() {
-        return new GenericObjectPoolConfig();
-    }
-
-    @Bean
-    public AbandonedConfig abandonedConfig() {
-        return new AbandonedConfig();
-    }
-
-    @Bean
     public Bootstrap bootstrap() {
         return new Bootstrap();
     }
+
+
 
 
 }

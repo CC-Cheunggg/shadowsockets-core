@@ -15,7 +15,7 @@ public class DataHandler {
 
     public void unknownAddressTypeHandler(ChannelHandlerContext ctx, ByteBuf dataBuff, int addressType, String userName, boolean isTrack) throws Exception {
         if (isTrack) {
-            logger.warn(userName + "'s unknown address type: " + addressType + " client address: " + ctx.channel().remoteAddress());
+            logger.info(userName + "'s unknown address type: " + addressType + " client address: " + ctx.channel().remoteAddress());
             logger.info("error data: {} ,data length :{} ,hex string :{}", dataBuff.toString(Charset.forName("utf-8"))
                     , dataBuff.readableBytes(), ByteBufUtil.hexDump(dataBuff));
         } else {
@@ -28,11 +28,9 @@ public class DataHandler {
         ctx.close();
     }
 
-    public void loggerHandler(ChannelHandlerContext ctx, ByteBuf dataBuff, String addressTypeString, String userName, String host, int port, boolean isTrack) throws Exception {
+    public void loggerHandler(ChannelHandlerContext ctx, ByteBuf dataBuff, String addressTypeString, String host, int port, boolean isTrack) throws Exception {
         if (isTrack) {
-            Thread.currentThread().getStackTrace()[1].getLineNumber();
-            logger.info("userName = " + userName + " =>  client address = " + ctx.channel().remoteAddress() + "  interview address = "
-                    + new InetSocketAddress(host, port));
+            logger.info("client address = " + ctx.channel().remoteAddress() + "  interview address = "+ new InetSocketAddress(host, port));
         }
     }
 

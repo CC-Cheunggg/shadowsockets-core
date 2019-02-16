@@ -1,12 +1,13 @@
 package com.cheung.shadowsockets.proxy;
 
+import com.cheung.shadowsockets.common.ClientProxy;
 import com.cheung.shadowsockets.encryption.CryptUtil;
 import com.cheung.shadowsockets.encryption.ICrypt;
 import com.cheung.shadowsockets.model.SSModel;
-import com.cheung.shadowsockets.pool.ClientProxy;
 import com.cheung.shadowsockets.utils.BootContext;
+import com.cheung.shadowsockets.utils.BytesUtils;
+import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -17,6 +18,8 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * 接受客户端代理发送来的消息
  */
@@ -25,13 +28,18 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(ClientProxyHandler.class);
     private final ICrypt _crypt;
     private volatile Channel remoteChannel = null;
-    private CompositeByteBuf clientCache = Unpooled.compositeBuffer();
+    private List<byte[]> clientCache = Lists.newCopyOnWriteArrayList();
     private ChannelHandlerContext channelHandlerContext;
 
 
     ClientProxyHandler(String host, int port, ByteBuf clientCache, ChannelHandlerContext channelHandlerContext, ICrypt _crypt) {
+
+        // 防止 channel 断开 无法 释放 byteBuf
+        byte[] data = BytesUtils.utils.byteBuf2Bytes(clientCache);
+        this.clientCache.add(data);
+        clientCache.release();
+
         this._crypt = _crypt;
-        this.clientCache.addComponent(clientCache);
         this.channelHandlerContext = channelHandlerContext;
         AttributeKey<SSModel> ss_model = AttributeKey.valueOf("ss.model");
         Attribute<SSModel> ssModelAttribute = channelHandlerContext.channel().attr(ss_model);
@@ -47,7 +55,7 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
 
         try {
             ClientProxy channelPool = BootContext.getBeanFactory().getBean(ClientProxy.class);
-            ChannelFuture future = channelPool.connect(host, port, new InternetDataHandler());
+            ChannelFuture future = channelPool.connect(host, port);
             // 保存客户端连接
             future.addListener(arg0 -> {
                 if (future.isSuccess()) {
@@ -78,7 +86,8 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
             remoteChannel.writeAndFlush(Unpooled.copiedBuffer(decrypt));
             buff.release();
         } else {
-            this.clientCache.addComponent(buff);
+
+            this.clientCache.add(decrypt);
         }
 
     }

@@ -1,28 +1,24 @@
 package com.cheung.shadowsockets.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@ToString
+@Data
 public class Config implements Serializable {
 
-    @Setter
-    @Getter
+
     private String ipAddr;
 
-    @Setter
-    @Getter
     private String localIpAddr;
 
-    @Setter
-    @Getter
     private boolean track;
 
-    @Getter
-    private User[] users;
+    private int serverPort;
+
+    private String method;
+
+    private String password;
 
 
 }

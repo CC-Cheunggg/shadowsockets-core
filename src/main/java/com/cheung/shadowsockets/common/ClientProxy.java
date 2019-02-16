@@ -1,5 +1,6 @@
-package com.cheung.shadowsockets.pool;
+package com.cheung.shadowsockets.common;
 
+import com.cheung.shadowsockets.proxy.InternetDataHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -21,6 +22,7 @@ public class ClientProxy {
     @Qualifier("internetEventLoopGroup")
     private EventLoopGroup internetEventLoopGroup;
 
+    private final InternetDataHandler internetDataHandler = new InternetDataHandler();
 
     @PostConstruct
     public void init() {
@@ -31,12 +33,11 @@ public class ClientProxy {
                 .option(ChannelOption.AUTO_READ, true);
     }
 
-
-    public ChannelFuture connect(final String host, final int port, final ChannelInboundHandler inboundHandler) {
+    public ChannelFuture connect(String host, int port) {
         return bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) {
-                ch.pipeline().addLast(inboundHandler);
+                ch.pipeline().addLast(internetDataHandler);
             }
         }).connect(host, port);
     }
