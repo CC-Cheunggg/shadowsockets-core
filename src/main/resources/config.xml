@@ -3,7 +3,7 @@
     <ipAddr>0.0.0.0</ipAddr>
     <localIpAddr>127.0.0.1</localIpAddr>
     <track>true</track>
-    <serverPort>1080</serverPort>
+    <serverPort>8388</serverPort>
     <method>aes-256-cfb</method>
     <password>000000</password>
 </config>

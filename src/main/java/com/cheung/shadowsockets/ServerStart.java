@@ -30,7 +30,7 @@ public class ServerStart implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
         log.info("current server pid: " + getCurrentPID());
+        log.info("default Configuration : port: 8388 , method: aes-256-cfb , password: 000000");
     }
 }
