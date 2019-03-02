@@ -1,5 +1,5 @@
 group 'com.cheung'
-version '1.4.2-min'
+version '1.5.0.Final'
 
 apply plugin: 'java'
 apply plugin: 'idea'

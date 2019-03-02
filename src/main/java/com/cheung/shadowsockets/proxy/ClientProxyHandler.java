@@ -73,7 +73,7 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
         ByteBuf buff = (ByteBuf) msg;
         if (buff.readableBytes() <= 0) {
@@ -93,7 +93,7 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive(ChannelHandlerContext ctx) {
         logger.info("ClientProxyHandler channelInactive close client address={}", ctx.channel().remoteAddress());
         ctx.close();
         if (remoteChannel != null) {
@@ -102,7 +102,7 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         logger.error("ClientProxyHandler error client address=" + ctx.channel().remoteAddress(), cause);
         ctx.close();
         if (remoteChannel != null) {
