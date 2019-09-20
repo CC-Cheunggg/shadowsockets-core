@@ -1,4 +1,4 @@
-package com.cheung.shadowsockets
+package com.cheung.shadowsocks
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil

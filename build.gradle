@@ -1,5 +1,5 @@
 group 'com.cheung'
-version '1.5.0.Final'
+version '1.6.0.Final'
 
 apply plugin: 'java'
 apply plugin: 'idea'
@@ -68,6 +68,7 @@ dependencies {
 //    compile 'javax.mail:mail:1.4.7'
 //    compile 'io.dropwizard.metrics:metrics-core:4.0.3'
     compile 'org.apache.ant:ant:1.10.5'
+//    compile 'net.java.dev.jna:jna:5.4.0'
     compile fileTree(dir: 'localLibs', include: ['*.jar'])
 
 
