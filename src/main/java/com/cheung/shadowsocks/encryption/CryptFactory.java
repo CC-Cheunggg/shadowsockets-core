@@ -19,6 +19,7 @@ public enum CryptFactory {
         crypts.putAll(SeedStreamCrypt.getCiphers());
         crypts.putAll(Chacha20StreamCrypt.getCiphers());
         crypts.putAll(AesGcmCrypt.getCiphers());
+        crypts.putAll(ChaCha20Poly1305Crypt.getCiphers());
     }
 
     public ICrypt get(String name, String password) {

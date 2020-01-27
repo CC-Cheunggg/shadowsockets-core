@@ -6,6 +6,7 @@ import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.modes.AEADBlockCipher;
+import org.bouncycastle.crypto.modes.AEADCipher;
 import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.HKDFParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
@@ -39,8 +40,8 @@ public abstract class AEADCryptBase implements ICrypt {
     protected boolean _decryptSaltSet;
     protected final ReentrantLock encLock = new ReentrantLock();
     protected final ReentrantLock decLock = new ReentrantLock();
-    protected AEADBlockCipher encCipher;
-    protected AEADBlockCipher decCipher;
+    protected AEADCipher encCipher;
+    protected AEADCipher decCipher;
     private byte[] encSubkey;
     private byte[] decSubkey;
     protected byte[] encNonce;
@@ -202,7 +203,7 @@ public abstract class AEADCryptBase implements ICrypt {
         return 16;
     }
 
-    protected abstract AEADBlockCipher getCipher(boolean isEncrypted) throws GeneralSecurityException;
+    protected abstract AEADCipher getCipher(boolean isEncrypted) throws GeneralSecurityException;
 
     protected abstract void _tcpEncrypt(byte[] data, ByteArrayOutputStream stream) throws GeneralSecurityException, IOException, InvalidCipherTextException;
 

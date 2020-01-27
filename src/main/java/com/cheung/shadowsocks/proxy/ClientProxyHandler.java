@@ -51,7 +51,12 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
         init(host, port);
     }
 
-    private void init(final String host, final int port) {
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        super.handlerAdded(ctx);
+    }
+
+    private synchronized void init(final String host, final int port) {
 
         try {
             ClientProxy channelPool = BootContext.getBeanFactory().getBean(ClientProxy.class);
