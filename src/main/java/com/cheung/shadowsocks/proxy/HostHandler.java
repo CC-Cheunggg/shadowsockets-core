@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 4次握手中的connect阶段，接受shadowsocks-netty发送给shadowsocks-netty-server的消息
@@ -29,6 +30,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
 
 //    private static final FileBasedConfigurationBuilder<FileBasedConfiguration> blacklist;
 //    private static final FileBasedConfigurationBuilder<FileBasedConfiguration> heartbeatPacket;
+    private final AtomicBoolean isUser = new AtomicBoolean(Boolean.FALSE);
 
     static {
 //        // 读取黑名单文件
@@ -82,6 +84,8 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buff = (ByteBuf) msg;
         decode(ctx, buff);
 
+
+
     }
 
 
@@ -120,7 +124,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
 //        return false;
 //    }
 
-    private void decode(ChannelHandlerContext ctx, ByteBuf buff) {
+    private synchronized void decode(ChannelHandlerContext ctx, ByteBuf buff) {
 
         int maxAddressLength = 1 + 1 + 255 + 2;
         ByteBuf dataBuff = Unpooled.buffer(maxAddressLength);
@@ -139,7 +143,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
             }
 
             ByteBuf copy = Unpooled.copiedBuffer(dataBuff);
-            logger.info("hex=======>>>> " + ByteBufUtil.hexDump(copy));
+            logger.info("hex=======>>>> " + ByteBufUtil.hexDump(copy)+"  handler ===>>> "+toString());
 
             // 读索引 不会改变
             byte addressType = dataBuff.getByte(0);
