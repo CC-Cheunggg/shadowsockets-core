@@ -30,8 +30,8 @@ public class ServerStart implements CommandLineRunner {
     }
 
     private void signalConfiguration() {
-        Signal.handle(new Signal("KILL"), signal -> log.info("shadowsocks server is killed."));
-        Signal.handle(new Signal("TERM"), signal -> log.info("shadowsocks server is terminated."));
+//        Signal.handle(new Signal("KILL"), signal -> log.info("shadowsocks server is killed."));
+//        Signal.handle(new Signal("TERM"), signal -> log.info("shadowsocks server is terminated."));
     }
 
     private void initLog() {

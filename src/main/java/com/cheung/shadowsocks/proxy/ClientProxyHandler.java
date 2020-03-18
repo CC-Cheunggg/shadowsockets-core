@@ -91,7 +91,6 @@ public class ClientProxyHandler extends ChannelInboundHandlerAdapter {
             remoteChannel.writeAndFlush(Unpooled.copiedBuffer(decrypt));
             buff.release();
         } else {
-
             this.clientCache.add(decrypt);
         }
 

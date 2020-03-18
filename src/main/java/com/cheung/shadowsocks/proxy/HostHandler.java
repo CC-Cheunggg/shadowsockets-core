@@ -124,12 +124,13 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
         ByteBuf dataBuff = Unpooled.buffer();
         String host;
         int port;
+        int maxAddressLength = 1 + 1 + 255 + 2;
         String addressTypeString;
 
         try {
             String codeText = GroovyUtils.readCodeTextInputStream(ClassLoader.getSystemResourceAsStream("handler-script.ss"), "UTF-8");
 
-            if (buff.readableBytes() <= 0) {
+            if (buff.readableBytes() < maxAddressLength) {
                 return;
             }
 
@@ -139,7 +140,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
             }
 
             // 读索引 不会改变
-            int addressType = dataBuff.getUnsignedByte(0);
+            byte addressType = dataBuff.getByte(0);
 
             // 手动 改变 读索引
             dataBuff.readerIndex(1);
@@ -158,7 +159,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
                 addressTypeString = SocksAddressType.DOMAIN.toString();
 
                 // 读索引 不会改变
-                int hostLength = dataBuff.getUnsignedByte(1);
+                int hostLength = dataBuff.getByte(1);
                 // 手动 改变 读索引
                 dataBuff.readerIndex(2);
                 if (dataBuff.readableBytes() < hostLength + 4) {

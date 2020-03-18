@@ -2,6 +2,7 @@ package com.cheung.shadowsocks.encryption;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * crypt 加密

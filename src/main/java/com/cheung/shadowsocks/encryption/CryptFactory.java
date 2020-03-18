@@ -2,6 +2,10 @@ package com.cheung.shadowsocks.encryption;
 
 import com.cheung.shadowsocks.encryption.impl.*;
 import com.google.common.collect.Maps;
+import com.zaxxer.hikari.HikariConfig;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 import java.util.Map;
 
@@ -10,9 +14,11 @@ public enum CryptFactory {
 
     factory;
 
-    private final static Map<String, Class<? extends ICrypt>> crypts = Maps.newConcurrentMap();
+    private final Map<String, Class<? extends ICrypt>> crypts = Maps.newConcurrentMap();
 
-    static {
+    CryptFactory(){
+
+
         crypts.putAll(AesStreamCrypt.getCiphers());
         crypts.putAll(CamelliaStreamCrypt.getCiphers());
         crypts.putAll(BlowFishStreamCrypt.getCiphers());
