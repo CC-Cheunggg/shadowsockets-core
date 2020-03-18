@@ -8,6 +8,7 @@ import com.cheung.shadowsocks.encryption.ICrypt;
 import com.cheung.shadowsocks.groovy.GroovyUtils;
 import com.cheung.shadowsocks.utils.BootContext;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -121,77 +122,85 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
 
     private void decode(ChannelHandlerContext ctx, ByteBuf buff) {
 
-        ByteBuf dataBuff = Unpooled.buffer();
+        int maxAddressLength = 1 + 1 + 255 + 2;
+        ByteBuf dataBuff = Unpooled.buffer(maxAddressLength);
         String host;
         int port;
         // 用作拆包
-        int maxAddressLength = 1 + 1 + 255 + 2;
         String addressTypeString;
 
         try {
             String codeText = GroovyUtils.readCodeTextInputStream(ClassLoader.getSystemResourceAsStream("handler-script.ss"), "UTF-8");
 
-            if (buff.readableBytes() < maxAddressLength) {
-                return;
-            }
-
             dataBuff.writeBytes(CryptUtil.decrypt(_crypt, buff));
+
             if (dataBuff.readableBytes() < 2) {
                 return;
             }
 
+            ByteBuf copy = Unpooled.copiedBuffer(dataBuff);
+            logger.info("hex=======>>>> " + ByteBufUtil.hexDump(copy));
+
             // 读索引 不会改变
             byte addressType = dataBuff.getByte(0);
+            SocksAddressType socksAddressType = SocksAddressType.valueOf(addressType);
 
             // 手动 改变 读索引
             dataBuff.readerIndex(1);
-            if (addressType == SocksAddressType.IPv4.byteValue()) {
-                addressTypeString = SocksAddressType.IPv4.toString();
-                if (dataBuff.readableBytes() < 7) {
+            switch (socksAddressType) {
+                case IPv4: {
+                    addressTypeString = SocksAddressType.IPv4.toString();
+                    if (dataBuff.readableBytes() < 7) {
+                        return;
+                    }
+
+                    byte[] ipBytes = new byte[4];
+                    dataBuff.readBytes(ipBytes);
+                    // 必须截取掉 第一位的 '/' 字符
+                    host = Inet4Address.getByAddress(ipBytes).toString().substring(1);
+                    port = dataBuff.readShort();
+                    break;
+                }
+                case DOMAIN: {
+                    addressTypeString = SocksAddressType.DOMAIN.toString();
+
+                    // 读索引 不会改变
+                    int hostLength = dataBuff.getByte(1);
+                    // 手动 改变 读索引
+                    dataBuff.readerIndex(2);
+                    if (dataBuff.readableBytes() < hostLength + 4) {
+                        return;
+                    }
+
+                    byte[] hostBytes = new byte[hostLength];
+                    dataBuff.readBytes(hostBytes);
+                    host = new String(hostBytes);
+                    port = dataBuff.readShort();
+                    break;
+                }
+                case IPv6: {
+                    addressTypeString = SocksAddressType.IPv6.toString();
+
+                    if (dataBuff.readableBytes() < 19) {
+                        return;
+                    }
+
+                    byte[] hostBytes = new byte[16];
+                    dataBuff.readBytes(hostBytes);
+                    // 必须截取掉 第一位的 '/' 字符
+                    host = Inet6Address.getByAddress(hostBytes).toString().substring(1);
+                    port = dataBuff.readShort();
+                    break;
+                }
+                default: {
+                    GroovyUtils.invokeMethod(codeText, "unknownAddressTypeHandler", ctx, buff, addressType, "", isTrack);
+                    GroovyUtils.clearGroovyClassLoaderCache();
+
+                    // 遇到不完整的包 就释放掉
+                    CryptUtil.releaseByteBufAllRefCnt(dataBuff);
+                    ctx.close();
                     return;
                 }
-
-                byte[] ipBytes = new byte[4];
-                dataBuff.readBytes(ipBytes);
-                // 必须截取掉 第一位的 '/' 字符
-                host = Inet4Address.getByAddress(ipBytes).toString().substring(1);
-                port = dataBuff.readShort();
-            } else if (addressType == SocksAddressType.DOMAIN.byteValue()) {
-                addressTypeString = SocksAddressType.DOMAIN.toString();
-
-                // 读索引 不会改变
-                int hostLength = dataBuff.getByte(1);
-                // 手动 改变 读索引
-                dataBuff.readerIndex(2);
-                if (dataBuff.readableBytes() < hostLength + 4) {
-                    return;
-                }
-
-                byte[] hostBytes = new byte[hostLength];
-                dataBuff.readBytes(hostBytes);
-                host = new String(hostBytes);
-                port = dataBuff.readShort();
-            } else if (addressType == SocksAddressType.IPv6.byteValue()) {
-                addressTypeString = SocksAddressType.IPv6.toString();
-
-                if (dataBuff.readableBytes() < 19) {
-                    return;
-                }
-
-                byte[] hostBytes = new byte[16];
-                dataBuff.readBytes(hostBytes);
-                // 必须截取掉 第一位的 '/' 字符
-                host = Inet6Address.getByAddress(hostBytes).toString().substring(1);
-                port = dataBuff.readShort();
-            } else {
-
-                GroovyUtils.invokeMethod(codeText, "unknownAddressTypeHandler", ctx, buff, addressType, "", isTrack);
-                GroovyUtils.clearGroovyClassLoaderCache();
-
-                // 遇到不完整的包 就释放掉
-                CryptUtil.releaseByteBufAllRefCnt(dataBuff);
-                ctx.close();
-                return;
             }
 
             GroovyUtils.invokeMethod(codeText, "loggerHandler", ctx, buff, addressTypeString, host, port, isTrack);
