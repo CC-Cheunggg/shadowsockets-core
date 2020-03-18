@@ -124,6 +124,7 @@ public class HostHandler extends ChannelInboundHandlerAdapter {
         ByteBuf dataBuff = Unpooled.buffer();
         String host;
         int port;
+        // 用作拆包
         int maxAddressLength = 1 + 1 + 255 + 2;
         String addressTypeString;
 
