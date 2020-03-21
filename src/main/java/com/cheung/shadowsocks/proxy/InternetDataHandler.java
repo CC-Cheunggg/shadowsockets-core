@@ -3,7 +3,6 @@ package com.cheung.shadowsocks.proxy;
 import com.cheung.shadowsocks.encryption.CryptUtil;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import com.cheung.shadowsocks.model.SSModel;
-import com.cheung.shadowsocks.utils.BytesUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -29,19 +28,9 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
-        List<byte[]> cacheBuffer = getCacheData(ctx);
-        Optional<List<byte[]>> optionalBytes = Optional.ofNullable(cacheBuffer);
-        if (!optionalBytes.isPresent()) {
-            return;
-        }
-
-        Channel channel = ctx.channel();
-        for (byte[] msg : cacheBuffer) {
-            ByteBuf byteBuf = BytesUtils.utils.bytes2ByteBuf(msg);
-            channel.writeAndFlush(byteBuf);
-        }
-        cacheBuffer.clear();
+       // ctx.channel().writeAndFlush(Unpooled.copiedBuffer(getCacheData(ctx)));
     }
+
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -106,7 +95,7 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         return ssModelAttribute.get().getCrypt();
     }
 
-    private List<byte[]> getCacheData(ChannelHandlerContext ctx) {
+    private List<byte[]> getCacheData0(ChannelHandlerContext ctx) {
         AttributeKey<SSModel> ssModel = AttributeKey.valueOf("ss.model");
         Optional<ChannelHandlerContext> channelHandlerContextOptional = Optional.ofNullable(getClientProxyChannel(ctx));
         if (!channelHandlerContextOptional.isPresent()) {
@@ -118,6 +107,21 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         }
         Attribute<SSModel> ssModelAttribute = getClientProxyChannel(ctx).channel().attr(ssModel);
         return ssModelAttribute.get().getData();
+
+    }
+
+    private byte[] getCacheData(ChannelHandlerContext ctx) {
+        AttributeKey<SSModel> ssModel = AttributeKey.valueOf("ss.model");
+        Optional<ChannelHandlerContext> channelHandlerContextOptional = Optional.ofNullable(getClientProxyChannel(ctx));
+        if (!channelHandlerContextOptional.isPresent()) {
+            return new byte[0];
+        }
+        Optional<Channel> channelOptional = Optional.ofNullable(getClientProxyChannel(ctx).channel());
+        if (!channelOptional.isPresent()) {
+            return new byte[0];
+        }
+        Attribute<SSModel> ssModelAttribute = getClientProxyChannel(ctx).channel().attr(ssModel);
+        return ssModelAttribute.get().getCacheData();
 
     }
 }

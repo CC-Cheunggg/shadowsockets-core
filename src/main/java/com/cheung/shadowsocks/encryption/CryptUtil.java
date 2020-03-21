@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class CryptUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(CryptUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(CryptUtil.class);
 
     public static byte[] encrypt(ICrypt crypt, ByteBuf bytebuff) {
         byte[] data = null;
@@ -23,8 +23,6 @@ public class CryptUtil {
                 crypt.encrypt(arr, arr.length, _remoteOutStream);
                 data = _remoteOutStream.toByteArray();
             }
-        } catch (Exception e) {
-            logger.error("encrypt error", e);
         } finally {
             if (_remoteOutStream != null) {
                 try {
@@ -49,8 +47,6 @@ public class CryptUtil {
                 crypt.decrypt(arr, arr.length, _localOutStream);
                 data = _localOutStream.toByteArray();
             }
-        } catch (Exception e) {
-            logger.error("encrypt error", e);
         } finally {
 
             if (_localOutStream != null) {

@@ -1,8 +1,8 @@
-package com.cheung.shadowsocks;
+package com.cheung.shadowsocks.server;
 
+import com.cheung.shadowsocks.codec.HostDecoder;
 import com.cheung.shadowsocks.config.Config;
 import com.cheung.shadowsocks.config.ConfigXmlLoader;
-import com.cheung.shadowsocks.proxy.HostHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -44,13 +44,13 @@ public class ShadowsocksServer implements ApplicationListener {
                     .channel(EpollServerSocketChannel.class)
                     .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000)
                     .childOption(ChannelOption.AUTO_READ, true)
-                    .childOption(ChannelOption.SO_KEEPALIVE,true)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
             bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
-                protected void initChannel(SocketChannel socketChannel) throws Exception {
-                    socketChannel.pipeline().addLast("hostHandler", new HostHandler());
+                protected void initChannel(SocketChannel socketChannel) {
+                    socketChannel.pipeline().addLast("hostDecoder", new HostDecoder());
                 }
             });
 
