@@ -60,21 +60,21 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
         switch (state()) {
             case HOST_TYPE: {
                 hostType = SocksAddressType.valueOf(data.readByte());
-                if (hostType == SocksAddressType.DOMAIN) {
-                    checkpoint(ReadState.HOST_LENGTH);
-                } else {
-                    checkpoint(ReadState.HOST_CONTENT);
-                }
                 if ((hostType != SocksAddressType.IPv4)
                         && (hostType != SocksAddressType.IPv6)
                         && (hostType != SocksAddressType.DOMAIN)) {
+                    CryptUtil.releaseByteBufAllRefCnt(data);
                     logger.info("UNKNOWN.........................");
                     return;
                 }
             }
             case HOST_LENGTH: {
-                domainLength = data.readByte();
-                checkpoint(ReadState.HOST_CONTENT);
+                if (hostType == SocksAddressType.DOMAIN) {
+                    domainLength = data.readByte();
+                    checkpoint(ReadState.HOST_LENGTH);
+                } else {
+                    checkpoint(ReadState.HOST_CONTENT);
+                }
             }
             case HOST_CONTENT: {
                 if (hostType == SocksAddressType.IPv4) {
@@ -97,6 +97,7 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                     CryptUtil.releaseByteBufAllRefCnt(data);
                     return;
                 }
+                logger.info(model.getHost());
                 checkpoint(ReadState.PORT);
             }
             case PORT: {
