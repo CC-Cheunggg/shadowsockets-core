@@ -8,9 +8,11 @@ import com.cheung.shadowsocks.encryption.CryptUtil;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import com.cheung.shadowsocks.model.SSModel;
 import com.cheung.shadowsocks.proxy.ProxyHandler;
+import com.cheung.shadowsocks.utils.BootContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.socks.SocksAddressType;
 import org.slf4j.Logger;
@@ -111,7 +113,9 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                 model.setCacheData(remain);
                 logger.info("from: {} ,TSN: {}", ctx.channel().remoteAddress().toString(),
                         ctx.channel().id().asLongText());
-                ctx.pipeline().addLast("proxyHandler", new ProxyHandler(model));
+                ctx.pipeline()
+                        .addLast(BootContext.getApplicationContext().getBean("eventExecutors", EventLoopGroup.class),
+                                "proxyHandler", new ProxyHandler(model));
                 checkpoint(ReadState.HOST_TYPE);
             }
         }

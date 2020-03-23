@@ -40,7 +40,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         Attribute<SSModel> ssModelAttribute = this.channelHandlerContext.channel().attr(ss_model);
         ssModelAttribute.setIfAbsent(ssModel);
         init(ssModel.getHost(), ssModel.getPort());
-        sendData(ssModel.getCacheData(), channelHandlerContext.channel().id().asLongText());
+        sendData(ssModel.getCacheData(), Boolean.TRUE, channelHandlerContext.channel().id().asLongText());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        sendData(CryptUtil.decrypt(_crypt, buff.asReadOnly()), ctx.channel().id().asLongText());
+        sendData(CryptUtil.decrypt(_crypt, buff.asReadOnly()), Boolean.FALSE, ctx.channel().id().asLongText());
         buff.release();
 
     }
@@ -103,10 +103,20 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void sendData(byte[] data, String channelId) {
+    private void sendData(byte[] data, boolean isFlush, String channelId) {
         if (remoteChannel.get() != null && remoteChannel.get().isActive()) {
             logger.info("from: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
-            remoteChannel.get().writeAndFlush(Unpooled.copiedBuffer(data));
+            if (isFlush) {
+                remoteChannel.get().writeAndFlush(Unpooled.copiedBuffer(data));
+            } else {
+                remoteChannel.get().write(Unpooled.copiedBuffer(data));
+            }
+
         }
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) {
+        remoteChannel.get().flush();
     }
 }
