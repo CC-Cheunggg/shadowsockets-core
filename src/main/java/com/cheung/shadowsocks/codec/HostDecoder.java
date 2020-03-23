@@ -73,10 +73,8 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
             case HOST_LENGTH: {
                 if (hostType == SocksAddressType.DOMAIN) {
                     domainLength = data.readByte();
-                    checkpoint(ReadState.HOST_LENGTH);
-                } else {
-                    checkpoint(ReadState.HOST_CONTENT);
                 }
+                checkpoint(ReadState.HOST_CONTENT);
             }
             case HOST_CONTENT: {
                 if (hostType == SocksAddressType.IPv4) {
