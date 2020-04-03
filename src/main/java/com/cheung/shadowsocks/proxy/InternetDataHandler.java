@@ -28,7 +28,14 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
-       // ctx.channel().writeAndFlush(Unpooled.copiedBuffer(getCacheData(ctx)));
+        List<byte[]> cache = getCacheData0(ctx);
+
+        if (cache != null) {
+            for (byte[] data : cache) {
+                ctx.channel().writeAndFlush(Unpooled.copiedBuffer(data));
+            }
+        }
+
     }
 
 

@@ -16,7 +16,8 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -27,8 +28,8 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(ProxyHandler.class);
     private final ICrypt _crypt;
     private final AtomicReference<Channel> remoteChannel = new AtomicReference<>(null);
-    private final CountDownLatch latch = new CountDownLatch(1);
     private ChannelHandlerContext channelHandlerContext;
+    private final List<byte[]> cache = new CopyOnWriteArrayList<>();
 
 
     public ProxyHandler(SSModel ssModel) {
@@ -36,6 +37,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         // 防止 channel 断开 无法 释放 byteBuf
         this._crypt = ssModel.getCrypt();
         this.channelHandlerContext = ssModel.getChannelHandlerContext();
+        ssModel.setData(cache);
         AttributeKey<SSModel> ss_model = AttributeKey.valueOf("ss.model");
         Attribute<SSModel> ssModelAttribute = this.channelHandlerContext.channel().attr(ss_model);
         ssModelAttribute.setIfAbsent(ssModel);
@@ -64,9 +66,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
                 } else {
                     future.cancel(true);
                 }
-                latch.countDown();
             });
-            latch.await();
         } catch (Exception e) {
             logger.error("connect intenet error", e);
         }
@@ -111,12 +111,15 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             } else {
                 remoteChannel.get().write(Unpooled.copiedBuffer(data));
             }
-
+        } else {
+            cache.add(data);
         }
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        remoteChannel.get().flush();
+        if (remoteChannel.get() != null) {
+            remoteChannel.get().flush();
+        }
     }
 }
