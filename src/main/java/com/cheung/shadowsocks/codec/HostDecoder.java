@@ -66,7 +66,7 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                         && (hostType != SocksAddressType.IPv6)
                         && (hostType != SocksAddressType.DOMAIN)) {
                     CryptUtil.releaseByteBufAllRefCnt(data);
-                    logger.info("UNKNOWN.........................");
+                    logger.error("UNKNOWN HOST TYPE.");
                     return;
                 }
             }
@@ -93,7 +93,7 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                     model.setHost(new String(hostBytes));
                 }
                 if (hostType == SocksAddressType.UNKNOWN) {
-                    logger.info("UNKNOWN.........................");
+                    logger.error("UNKNOWN HOST TYPE.");
                     CryptUtil.releaseByteBufAllRefCnt(data);
                     return;
                 }
