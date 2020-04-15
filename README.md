@@ -1,11 +1,60 @@
-# shadowsockets-core
-java版 ss代理
+# shadowsocks-core shadowsocks（java实现）
 
+> 维护了java版的 shadowsocks 实现
 
-           由于 运行依赖  无需经常维护，所以将其拆分发布，下载 shadowsockets-server-runtime.zip、 
-       shadowsockets-core-x.x.x-min.jar 后，解压 shadowsockets-server-runtime.zip， 
-       并将 shadowsockets-core-x.x.x-min.jar 放在 shadowsockets-server-runtime/lib目录下，运行 
-       shadowsockets-server-runtime/bin下的脚本即可。
- 
+[![]()]()
 
-发布版本API： https://api.github.com/repos/RPCheung/shadowsockets-core/releases
+## Getting Started 使用指南
+
+### 使用条件
+
+```
+在支持BBR加速的vps中的Linux系统中安装JDK 8.0+ 、安装BBR。
+```
+
+### Installation 安装
+
+```
+1.在发行页下载最新的 shadowsockets-server-runtime 和 shadowsocks-core-X.X.X.Final.jar 部署到代理服务器中。
+2.解压 shadowsockets-server-runtime
+```
+
+### Usage example 使用示例
+
+```
+1.在 hadowsockets-server-runtime/conf 编辑 config.xml 其中 ipAddr 为服务器本身的ip，大多数情况下默认即可，
+  localIpAddr 和 track 参数为保留参数，serverPort为 shadowsocks 客户端访问端口，method 则为客户端加密的方式
+  (推荐使用 chacha20-ietf-poly1305)，password则为客户端输入的密码。
+2.编辑完 config.xml 后，执行 shadowsockets-server-runtime/bin 下的 startup.sh 脚本，观察启动日志。
+3.正常启动后 Ctrl + C 终止进程，执行 ss-server-background.sh 脚本让应用后台运行。
+```
+
+## Deployment 部署方法
+
+```
+1.把下载好的 shadowsocks-core-X.X.X.Final.jar 移动到解压好的 shadowsockets-server-runtime/lib 中
+2.赋予shadowsockets-server-runtime目录可读可写权限
+3.赋予bin目录下所有文件可执行权限
+```
+
+## Contributing 贡献指南
+
+请阅读 [shadowsocks.org](https://shadowsocks.org/) 了解如何向这个项目贡献代码
+
+## Release History 版本历史
+
+* 1.7.0.Final
+    * 修复小火箭不能连接的缺陷
+    * 新增了Chacha20Poly1305加密方式
+* 1.6.0.Final
+    * 增加AEAD加密 ：aes-128-gcm
+* 1.5.0.Final
+    * 新增了线程池可在配置文件中配置的功能
+
+## Authors 关于作者
+
+* **RPCheung** - *Initial work* - [RPCheung](https://github.com/RPCheung)
+
+## License 授权协议
+
+这个项目遵循 Apache 协议， 请点击 [LICENSE](https://github.com/RPCheung/shadowsockets-core/blob/master/LICENSE) 了解更多细节。
