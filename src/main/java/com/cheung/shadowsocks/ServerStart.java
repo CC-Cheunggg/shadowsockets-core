@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import sun.misc.Signal;
 
 /**
  * socksserver启动类
@@ -14,6 +13,7 @@ import sun.misc.Signal;
 @Slf4j
 @SpringBootApplication
 @EnableScheduling
+@SuppressWarnings("restriction")
 public class ServerStart implements CommandLineRunner {
 
     static {
