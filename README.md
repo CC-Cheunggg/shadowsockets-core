@@ -16,7 +16,8 @@
 
 ```
 1.在发行页下载最新的 shadowsockets-server-runtime 和 shadowsocks-core-X.X.X.Final.jar 到代理服务器中。
-2.解压 shadowsockets-server-runtime
+2.解压 shadowsockets-server-runtime。
+3.shadowsocks-core-1.7.0.Final.jar 以上版本均需要使用0.2.0版本的 shadowsockets-server-runtime。
 ```
 
 ### 使用示例
