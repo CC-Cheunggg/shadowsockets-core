@@ -1,4 +1,4 @@
-# shadowsocks-core shadowsocks（java实现）
+# shadowsocks（java实现）
 
 > 维护了java版的 shadowsocks 实现
 
@@ -40,7 +40,7 @@
 
 ## 贡献指南
 
-请阅读 [shadowsocks.org](https://shadowsocks.org/) 了解如何向这个项目贡献代码
+如有不足请提交 [issues](https://github.com/RPCheung/shadowsockets-core/issues/new)，作者会及时跟踪。
 
 ## 版本历史
 
