@@ -22,8 +22,8 @@
 ### Usage example 使用示例
 
 ```
-1.在 shadowsockets-server-runtime/conf 编辑 config.xml 其中 ipAddr 为服务器本身的ip，大多数情况下默认即可，localIpAddr 和
-  track 参数为保留参数，serverPort为 shadowsocks 客户端访问端口，method 则为客户端加密的方式(推荐使用 chacha20-ietf-
+1.在 shadowsockets-server-runtime/conf 编辑 config.xml 其中 ipAddr 为服务器本身的ip，大多数情况下默认即可，localIpAddr 
+  和 track 参数为保留参数，serverPort为 shadowsocks 客户端访问端口，method 则为客户端加密的方式(推荐使用 chacha20-ietf-
   poly1305)，password则为客户端输入的密码。
 2.编辑完 config.xml 后，执行 shadowsockets-server-runtime/bin 下的 startup.sh 脚本，观察启动日志。
 3.正常启动后 Ctrl + C 终止进程，执行 ss-server-background.sh 脚本让应用后台运行。
