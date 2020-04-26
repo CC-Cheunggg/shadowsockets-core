@@ -9,15 +9,17 @@
 ### 项目使用条件
 
 ```
-在支持BBR加速的vps中的Linux系统中安装JDK 8.0+ 、安装BBR。（暂时不支持在 Windows 中部署）
+在支持安装BBR加速的vps中使用。（暂时不支持在 Windows 中部署）
 ```
 
 ### 安装
 
+***shadowsocks-core-1.7.0.Final.jar 及以上版本均需要使用0.2.0版本的 shadowsockets-server-runtime***
+
 ```
-1.在发行页下载最新的 shadowsockets-server-runtime 和 shadowsocks-core-X.X.X.Final.jar 到代理服务器中。
-2.解压 shadowsockets-server-runtime。
-3.shadowsocks-core-1.7.0.Final.jar 及以上版本均需要使用0.2.0版本的 shadowsockets-server-runtime。
+1.安装 JDK 1.8+
+2.在发行页下载最新的 shadowsockets-server-runtime 和 shadowsocks-core-X.X.X.Final.jar 到代理服务器中。
+3.解压 shadowsockets-server-runtime。
 ```
 
 ### 使用示例
@@ -47,9 +49,9 @@
 
 * 1.7.0.Final
     * 修复小火箭不能连接的缺陷
-    * 增加AEAD加密 ：aes-256-gcm、chacha20-ietf-poly1305
+    * 增加AEAD加密方式 ：aes-256-gcm、chacha20-ietf-poly1305
 * 1.6.0.Final
-    * 增加AEAD加密 ：aes-128-gcm
+    * 增加AEAD加密方式 ：aes-128-gcm
 * 1.5.0.Final
     * 新增了线程池可在配置文件中配置的功能
 
