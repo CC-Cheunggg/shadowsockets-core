@@ -6,19 +6,19 @@
     </Properties>
     <appenders>
         <console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %m%n"/>
+            <PatternLayout pattern="# %t # =====&gt; [%p] [%d{yyyy-MM-dd HH:mm:ss}] &lt; %c &gt; [(%M %L)] (%m) %n"/>
         </console>
         <RollingFile name="trace" fileName="${logDir}/shadowsockets_trace.log"
                      filePattern="${logDir}/shadowsockets_trace.log.%d{yyyy-MM-dd}">
             <PatternLayout
-                    pattern="# %t # =====&gt; [%p] [%d{yyyy-MM-dd HH:mm:ss}] &lt; %c &gt; [(%x %M %L)] (%m) %n"/>
+                    pattern="# %t # =====&gt; [%p] [%d{yyyy-MM-dd HH:mm:ss}] &lt; %c &gt; [(%M %L)] (%m) %n"/>
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
         </RollingFile>
 
         <RollingFile name="netty" fileName="${logDir}/netty_trace.log"
                      filePattern="${logDir}/netty_trace.log.%d{yyyy-MM-dd}">
             <PatternLayout
-                    pattern="# %t # ---&gt; [%p] [%d{yyyy-MM-dd HH:mm:ss}] &lt; %c &gt; [(%x %M %L)] (%m) %n"/>
+                    pattern="# %t # ---&gt; [%p] [%d{yyyy-MM-dd HH:mm:ss}] &lt; %c &gt; [(%M %L)] (%m) %n"/>
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
         </RollingFile>
         <RollingFile name="error" fileName="${logDir}/shadowsockets_error.log"

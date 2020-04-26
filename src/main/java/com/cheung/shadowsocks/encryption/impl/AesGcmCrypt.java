@@ -1,11 +1,11 @@
 package com.cheung.shadowsocks.encryption.impl;
 
 import com.cheung.shadowsocks.encryption.AEADCryptBase;
+import com.cheung.shadowsocks.encryption.CryptName;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.InvalidCipherTextException;
 import org.bouncycastle.crypto.engines.AESEngine;
-import org.bouncycastle.crypto.modes.AEADBlockCipher;
 import org.bouncycastle.crypto.modes.AEADCipher;
 import org.bouncycastle.crypto.modes.GCMBlockCipher;
 
@@ -14,24 +14,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
+@CryptName({"aes-128-gcm", "aes-256-gcm"})
 public class AesGcmCrypt extends AEADCryptBase {
 
     public final static String CIPHER_AEAD_128_GCM = "aes-128-gcm";
-    //    public final static String CIPHER_AEAD_192_GCM = "aes-192-gcm";
     public final static String CIPHER_AEAD_256_GCM = "aes-256-gcm";
-
-    public static Map<String, Class<? extends ICrypt>> getCiphers() {
-        Map<String, Class<? extends ICrypt>> ciphers = new HashMap<>();
-        ciphers.put(CIPHER_AEAD_128_GCM, AesGcmCrypt.class);
-//        ciphers.put(CIPHER_AEAD_192_GCM, AesGcmCrypt.class.getName());
-        ciphers.put(CIPHER_AEAD_256_GCM, AesGcmCrypt.class);
-
-        return ciphers;
-    }
 
     public AesGcmCrypt(String name, String password) {
         super(name, password);
@@ -43,8 +32,6 @@ public class AesGcmCrypt extends AEADCryptBase {
         switch (_name) {
             case CIPHER_AEAD_128_GCM:
                 return 16;
-//            case CIPHER_AEAD_192_GCM:
-//                return 24;
             case CIPHER_AEAD_256_GCM:
                 return 32;
         }
@@ -68,8 +55,6 @@ public class AesGcmCrypt extends AEADCryptBase {
         switch (_name) {
             case CIPHER_AEAD_128_GCM:
                 return 16;
-//            case CIPHER_AEAD_192_GCM:
-//              return 24;
             case CIPHER_AEAD_256_GCM:
                 return 32;
         }
@@ -95,20 +80,20 @@ public class AesGcmCrypt extends AEADCryptBase {
         while (buffer.hasRemaining()) {
             int nr = Math.min(buffer.remaining(), PAYLOAD_SIZE_MASK);
             ByteBuffer.wrap(encBuffer).putShort((short) nr);
-            encCipher.init(true, getCipherParameters(true));
-            encCipher.doFinal(
+            encCipher.get().init(true, getCipherParameters(true));
+            encCipher.get().doFinal(
                     encBuffer,
-                    encCipher.processBytes(encBuffer, 0, 2, encBuffer, 0)
+                    encCipher.get().processBytes(encBuffer, 0, 2, encBuffer, 0)
             );
             stream.write(encBuffer, 0, 2 + getTagLength());
             increment(this.encNonce);
 
             buffer.get(encBuffer, 2 + getTagLength(), nr);
 
-            encCipher.init(true, getCipherParameters(true));
-            encCipher.doFinal(
+            encCipher.get().init(true, getCipherParameters(true));
+            encCipher.get().doFinal(
                     encBuffer,
-                    2 + getTagLength() + encCipher.processBytes(encBuffer, 2 + getTagLength(), nr, encBuffer, 2 + getTagLength())
+                    2 + getTagLength() + encCipher.get().processBytes(encBuffer, 2 + getTagLength(), nr, encBuffer, 2 + getTagLength())
             );
             increment(this.encNonce);
 
@@ -143,10 +128,10 @@ public class AesGcmCrypt extends AEADCryptBase {
                     payloadLenRead += remaining;
                     return;
                 }
-                decCipher.init(false, getCipherParameters(false));
-                decCipher.doFinal(
+                decCipher.get().init(false, getCipherParameters(false));
+                decCipher.get().doFinal(
                         decBuffer,
-                        decCipher.processBytes(decBuffer, 0, 2 + getTagLength(), decBuffer, 0)
+                        decCipher.get().processBytes(decBuffer, 0, 2 + getTagLength(), decBuffer, 0)
                 );
                 increment(decNonce);
             }
@@ -170,10 +155,10 @@ public class AesGcmCrypt extends AEADCryptBase {
                 }
             }
 
-            decCipher.init(false, getCipherParameters(false));
-            decCipher.doFinal(
+            decCipher.get().init(false, getCipherParameters(false));
+            decCipher.get().doFinal(
                     decBuffer,
-                    (2 + getTagLength()) + decCipher.processBytes(decBuffer, 2 + getTagLength(), size + getTagLength(), decBuffer, 2 + getTagLength())
+                    (2 + getTagLength()) + decCipher.get().processBytes(decBuffer, 2 + getTagLength(), size + getTagLength(), decBuffer, 2 + getTagLength())
             );
             increment(decNonce);
 
@@ -181,7 +166,6 @@ public class AesGcmCrypt extends AEADCryptBase {
             payloadRead = 0;
 
             stream.write(decBuffer, 2 + getTagLength(), size);
-//            logger.debug("cipher text decode finish");
         }
     }
 
@@ -190,10 +174,10 @@ public class AesGcmCrypt extends AEADCryptBase {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         int remaining = buffer.remaining();
         buffer.get(encBuffer, 0, remaining);
-        encCipher.init(true, getCipherParameters(true));
-        encCipher.doFinal(
+        encCipher.get().init(true, getCipherParameters(true));
+        encCipher.get().doFinal(
                 encBuffer,
-                encCipher.processBytes(encBuffer, 0, remaining, encBuffer, 0)
+                encCipher.get().processBytes(encBuffer, 0, remaining, encBuffer, 0)
         );
         stream.write(encBuffer, 0, remaining + getTagLength());
     }
@@ -203,10 +187,10 @@ public class AesGcmCrypt extends AEADCryptBase {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         int remaining = buffer.remaining();
         buffer.get(decBuffer, 0, remaining);
-        decCipher.init(false, getCipherParameters(false));
-        decCipher.doFinal(
+        decCipher.get().init(false, getCipherParameters(false));
+        decCipher.get().doFinal(
                 decBuffer,
-                decCipher.processBytes(decBuffer, 0, remaining, decBuffer, 0)
+                decCipher.get().processBytes(decBuffer, 0, remaining, decBuffer, 0)
         );
         stream.write(decBuffer, 0, remaining - getTagLength());
     }

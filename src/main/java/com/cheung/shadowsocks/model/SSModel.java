@@ -14,6 +14,7 @@ import java.util.List;
 public class SSModel {
 
     private ChannelHandlerContext channelHandlerContext;
+    private String tsn;
     private ICrypt crypt;
     private List<byte[]> data;
     private byte[] cacheData;

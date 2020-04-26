@@ -29,6 +29,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     private final ICrypt _crypt;
     private final AtomicReference<Channel> remoteChannel = new AtomicReference<>(null);
     private ChannelHandlerContext channelHandlerContext;
+    private final AtomicReference<String> tsn = new AtomicReference<>("");
     private final List<byte[]> cache = new CopyOnWriteArrayList<>();
 
 
@@ -41,13 +42,14 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         AttributeKey<SSModel> ss_model = AttributeKey.valueOf("ss.model");
         Attribute<SSModel> ssModelAttribute = this.channelHandlerContext.channel().attr(ss_model);
         ssModelAttribute.setIfAbsent(ssModel);
+        tsn.compareAndSet("", ssModel.getTsn());
         init(ssModel.getHost(), ssModel.getPort());
-        sendData(ssModel.getCacheData(), Boolean.TRUE, channelHandlerContext.channel().id().asLongText());
+        sendData(ssModel.getCacheData(), Boolean.TRUE, ssModel.getTsn());
     }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        ctx.pipeline().remove("hostDecoder");
+        ctx.pipeline().remove("shadowsocksDecoder");
     }
 
     private synchronized void init(final String host, final int port) {
@@ -80,7 +82,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
-        sendData(CryptUtil.decrypt(_crypt, buff.asReadOnly()), Boolean.FALSE, ctx.channel().id().asLongText());
+        sendData(CryptUtil.decrypt(_crypt, buff.asReadOnly()), Boolean.FALSE, tsn.get());
         buff.release();
 
     }
@@ -105,7 +107,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
 
     private void sendData(byte[] data, boolean isFlush, String channelId) {
         if (remoteChannel.get() != null && remoteChannel.get().isActive()) {
-            logger.info("from: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
+            logger.info("to: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
             if (isFlush) {
                 remoteChannel.get().writeAndFlush(Unpooled.copiedBuffer(data));
             } else {

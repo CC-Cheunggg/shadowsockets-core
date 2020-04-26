@@ -1,6 +1,7 @@
 package com.cheung.shadowsocks.encryption.impl;
 
 import com.cheung.shadowsocks.encryption.AEADCryptBase;
+import com.cheung.shadowsocks.encryption.CryptName;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.InvalidCipherTextException;
@@ -11,22 +12,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
+@CryptName({"chacha20-ietf-poly1305"})
 public class ChaCha20Poly1305Crypt extends AEADCryptBase {
 
     public final static String AEAD_CHACHA20_POLY1305 = "chacha20-ietf-poly1305";
 
     public ChaCha20Poly1305Crypt(String name, String password) {
         super(name, password);
-    }
-
-    public static Map<String, Class<? extends ICrypt>> getCiphers() {
-        Map<String, Class<? extends ICrypt>> ciphers = new HashMap<>();
-        ciphers.put(AEAD_CHACHA20_POLY1305, ChaCha20Poly1305Crypt.class);
-        return ciphers;
     }
 
     @Override
@@ -40,20 +34,20 @@ public class ChaCha20Poly1305Crypt extends AEADCryptBase {
         while (buffer.hasRemaining()) {
             int nr = Math.min(buffer.remaining(), PAYLOAD_SIZE_MASK);
             ByteBuffer.wrap(encBuffer).putShort((short) nr);
-            encCipher.init(true, getCipherParameters(true));
-            encCipher.doFinal(
+            encCipher.get().init(true, getCipherParameters(true));
+            encCipher.get().doFinal(
                     encBuffer,
-                    encCipher.processBytes(encBuffer, 0, 2, encBuffer, 0)
+                    encCipher.get().processBytes(encBuffer, 0, 2, encBuffer, 0)
             );
             stream.write(encBuffer, 0, 2 + getTagLength());
             increment(this.encNonce);
 
             buffer.get(encBuffer, 2 + getTagLength(), nr);
 
-            encCipher.init(true, getCipherParameters(true));
-            encCipher.doFinal(
+            encCipher.get().init(true, getCipherParameters(true));
+            encCipher.get().doFinal(
                     encBuffer,
-                    2 + getTagLength() + encCipher.processBytes(encBuffer, 2 + getTagLength(), nr, encBuffer, 2 + getTagLength())
+                    2 + getTagLength() + encCipher.get().processBytes(encBuffer, 2 + getTagLength(), nr, encBuffer, 2 + getTagLength())
             );
             increment(this.encNonce);
 
@@ -76,10 +70,10 @@ public class ChaCha20Poly1305Crypt extends AEADCryptBase {
                     payloadLenRead += remaining;
                     return;
                 }
-                decCipher.init(false, getCipherParameters(false));
-                decCipher.doFinal(
+                decCipher.get().init(false, getCipherParameters(false));
+                decCipher.get().doFinal(
                         decBuffer,
-                        decCipher.processBytes(decBuffer, 0, 2 + getTagLength(), decBuffer, 0)
+                        decCipher.get().processBytes(decBuffer, 0, 2 + getTagLength(), decBuffer, 0)
                 );
                 increment(decNonce);
             }
@@ -101,10 +95,10 @@ public class ChaCha20Poly1305Crypt extends AEADCryptBase {
                 }
             }
 
-            decCipher.init(false, getCipherParameters(false));
-            decCipher.doFinal(
+            decCipher.get().init(false, getCipherParameters(false));
+            decCipher.get().doFinal(
                     decBuffer,
-                    (2 + getTagLength()) + decCipher.processBytes(decBuffer, 2 + getTagLength(), size + getTagLength(), decBuffer, 2 + getTagLength())
+                    (2 + getTagLength()) + decCipher.get().processBytes(decBuffer, 2 + getTagLength(), size + getTagLength(), decBuffer, 2 + getTagLength())
             );
             increment(decNonce);
 

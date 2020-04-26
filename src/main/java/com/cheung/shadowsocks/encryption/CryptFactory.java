@@ -1,31 +1,34 @@
 package com.cheung.shadowsocks.encryption;
 
-import com.cheung.shadowsocks.encryption.impl.*;
 import com.google.common.collect.Maps;
-import com.zaxxer.hikari.HikariConfig;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Set;
 
-
+@Slf4j
 public enum CryptFactory {
 
     factory;
 
     private final Map<String, Class<? extends ICrypt>> crypts = Maps.newConcurrentMap();
+    private final Set<Class<? extends ICrypt>> cryptClasses = Sets.newConcurrentHashSet();
 
-    CryptFactory(){
+    public void registerCrypt() {
+        for (Class<? extends ICrypt> clz : cryptClasses) {
+            if (clz.isAnnotationPresent(CryptName.class)) {
+                CryptName cryptPlugin = clz.getAnnotation(CryptName.class);
+                for (String val : cryptPlugin.value()) {
+                    log.info("已开启的算法=========>>>> " + val);
+                    crypts.put(val.trim(), clz);
+                }
+            }
+        }
+    }
 
-
-        crypts.putAll(AesStreamCrypt.getCiphers());
-        crypts.putAll(CamelliaStreamCrypt.getCiphers());
-        crypts.putAll(BlowFishStreamCrypt.getCiphers());
-        crypts.putAll(SeedStreamCrypt.getCiphers());
-        crypts.putAll(Chacha20StreamCrypt.getCiphers());
-        crypts.putAll(AesGcmCrypt.getCiphers());
-        crypts.putAll(ChaCha20Poly1305Crypt.getCiphers());
+    public void addCryptClass(Class<? extends ICrypt> crypt) {
+        cryptClasses.add(crypt);
     }
 
     public ICrypt get(String name, String password) {

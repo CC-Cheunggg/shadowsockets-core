@@ -28,10 +28,12 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
 
-        List<byte[]> cache = getCacheData0(ctx);
+        SSModel model = getSSModel(ctx);
+        List<byte[]> cache = model.getData();
 
         if (cache != null) {
             for (byte[] data : cache) {
+                logger.info("to: {} ,TSN: {}", ctx.channel().remoteAddress().toString(), model.getTsn());
                 ctx.channel().writeAndFlush(Unpooled.copiedBuffer(data));
             }
         }
@@ -45,7 +47,7 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         ChannelHandlerContext clientProxyChannel = getClientProxyChannel(ctx);
         ICrypt _crypt = getCrypt(ctx);
 
-        ByteBuf data = ByteBuf.class.cast(msg);
+        ByteBuf data = (ByteBuf) msg;
         byte[] deData = CryptUtil.encrypt(_crypt, data);
 
         Channel channel = clientProxyChannel.channel();
@@ -102,33 +104,17 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         return ssModelAttribute.get().getCrypt();
     }
 
-    private List<byte[]> getCacheData0(ChannelHandlerContext ctx) {
+    private SSModel getSSModel(ChannelHandlerContext ctx) {
         AttributeKey<SSModel> ssModel = AttributeKey.valueOf("ss.model");
         Optional<ChannelHandlerContext> channelHandlerContextOptional = Optional.ofNullable(getClientProxyChannel(ctx));
         if (!channelHandlerContextOptional.isPresent()) {
-            return null;
+            throw new IllegalStateException("ss model is null");
         }
         Optional<Channel> channelOptional = Optional.ofNullable(getClientProxyChannel(ctx).channel());
         if (!channelOptional.isPresent()) {
-            return null;
+            throw new IllegalStateException("ss model is null");
         }
         Attribute<SSModel> ssModelAttribute = getClientProxyChannel(ctx).channel().attr(ssModel);
-        return ssModelAttribute.get().getData();
-
-    }
-
-    private byte[] getCacheData(ChannelHandlerContext ctx) {
-        AttributeKey<SSModel> ssModel = AttributeKey.valueOf("ss.model");
-        Optional<ChannelHandlerContext> channelHandlerContextOptional = Optional.ofNullable(getClientProxyChannel(ctx));
-        if (!channelHandlerContextOptional.isPresent()) {
-            return new byte[0];
-        }
-        Optional<Channel> channelOptional = Optional.ofNullable(getClientProxyChannel(ctx).channel());
-        if (!channelOptional.isPresent()) {
-            return new byte[0];
-        }
-        Attribute<SSModel> ssModelAttribute = getClientProxyChannel(ctx).channel().attr(ssModel);
-        return ssModelAttribute.get().getCacheData();
-
+        return ssModelAttribute.get();
     }
 }

@@ -17,6 +17,8 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -31,19 +33,18 @@ public abstract class AEADCryptBase implements ICrypt {
 
     private static byte[] ZERO_NONCE = new byte[getNonceLength()];
 
-
     protected final String _name;
     protected final ShadowSocksKey _ssKey;
     protected final int _keyLength;
     private boolean isForUdp = false;
-    protected boolean _encryptSaltSet;
-    protected boolean _decryptSaltSet;
+    protected final AtomicBoolean _encryptSaltSet = new AtomicBoolean(Boolean.FALSE);
+    protected final AtomicBoolean _decryptSaltSet = new AtomicBoolean(Boolean.FALSE);
     protected final ReentrantLock encLock = new ReentrantLock();
     protected final ReentrantLock decLock = new ReentrantLock();
-    protected AEADCipher encCipher;
-    protected AEADCipher decCipher;
-    private byte[] encSubkey;
-    private byte[] decSubkey;
+    protected final AtomicReference<AEADCipher> encCipher = new AtomicReference<>();
+    protected final AtomicReference<AEADCipher> decCipher = new AtomicReference<>();
+    private final AtomicReference<byte[]> encSubkey = new AtomicReference<>();
+    private final AtomicReference<byte[]> decSubkey = new AtomicReference<>();
     protected byte[] encNonce;
     protected byte[] decNonce;
 
@@ -103,7 +104,6 @@ public abstract class AEADCryptBase implements ICrypt {
 
 
     protected CipherParameters getCipherParameters(boolean forEncryption) {
-//        logger.debug("getCipherParameters subkey:{}",Arrays.toString(forEncryption ? encSubkey : decSubkey));
         byte[] nonce;
         if (!isForUdp) {
             nonce = forEncryption ? Arrays.copyOf(encNonce, getNonceLength()) : Arrays.copyOf(decNonce, getNonceLength());
@@ -111,7 +111,7 @@ public abstract class AEADCryptBase implements ICrypt {
             nonce = ZERO_NONCE;
         }
         return new AEADParameters(
-                new KeyParameter(forEncryption ? encSubkey : decSubkey),
+                new KeyParameter(forEncryption ? encSubkey.get() : decSubkey.get()),
                 getTagLength() * 8,
                 nonce
         );
@@ -120,15 +120,15 @@ public abstract class AEADCryptBase implements ICrypt {
     @Override
     public void encrypt(byte[] data, ByteArrayOutputStream stream) {
         try {
-            encLock.lockInterruptibly();
             stream.reset();
-            if (!_encryptSaltSet || isForUdp) {
+            if (!_encryptSaltSet.get() || isForUdp) {
                 byte[] salt = randomBytes(getSaltLength());
                 stream.write(salt);
-                encSubkey = genSubkey(salt);
-                encCipher = getCipher(true);
-                _encryptSaltSet = true;
+                encSubkey.compareAndSet(null, genSubkey(salt));
+                encCipher.compareAndSet(null, getCipher(true));
+                _encryptSaltSet.compareAndSet(Boolean.FALSE, Boolean.TRUE);
             }
+            encLock.lockInterruptibly();
             if (!isForUdp) {
                 _tcpEncrypt(data, stream);
             } else {
@@ -145,7 +145,6 @@ public abstract class AEADCryptBase implements ICrypt {
 
     @Override
     public void encrypt(byte[] data, int length, ByteArrayOutputStream stream) {
-//        logger.debug("{} encrypt {}", this.hashCode(),new String(data, Charset.forName("GBK")));//
         byte[] d = Arrays.copyOfRange(data, 0, length);
         encrypt(d, stream);
     }
@@ -154,20 +153,20 @@ public abstract class AEADCryptBase implements ICrypt {
     public void decrypt(byte[] data, ByteArrayOutputStream stream) {
         byte[] temp;
         try {
-            decLock.lockInterruptibly();
             stream.reset();
             ByteBuffer buffer = ByteBuffer.wrap(data);
-            if (decCipher == null || isForUdp) {
-                _decryptSaltSet = true;
+            if (decCipher.get() == null || isForUdp) {
+                _decryptSaltSet.compareAndSet(Boolean.FALSE, Boolean.TRUE);
                 byte[] salt = new byte[getSaltLength()];
                 buffer.get(salt);
-                decSubkey = genSubkey(salt);
-                decCipher = getCipher(false);
+                decSubkey.compareAndSet(null, genSubkey(salt));
+                decCipher.compareAndSet(null, getCipher(false));
                 temp = new byte[buffer.remaining()];
                 buffer.get(temp);
             } else {
                 temp = data;
             }
+            decLock.lockInterruptibly();
             if (!isForUdp) {
                 _tcpDecrypt(temp, stream);
             } else {
@@ -184,7 +183,6 @@ public abstract class AEADCryptBase implements ICrypt {
 
     @Override
     public void decrypt(byte[] data, int length, ByteArrayOutputStream stream) {
-//        logger.debug("{} decrypt {}", this.hashCode(),Arrays.toString(data));
         byte[] d = Arrays.copyOfRange(data, 0, length);
         decrypt(d, stream);
     }

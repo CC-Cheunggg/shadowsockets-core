@@ -22,7 +22,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.List;
 
-public class HostDecoder extends ReplayingDecoder<ReadState> {
+public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
 
     private static Config config;
 
@@ -36,9 +36,9 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
     private SocksAddressType hostType;
 
 
-    private static final Logger logger = LoggerFactory.getLogger(HostDecoder.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShadowsocksDecoder.class);
 
-    public HostDecoder() {
+    public ShadowsocksDecoder() {
         super(ReadState.HOST_TYPE);
     }
 
@@ -97,7 +97,6 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                     CryptUtil.releaseByteBufAllRefCnt(data);
                     return;
                 }
-                logger.info(model.getHost());
                 checkpoint(ReadState.PORT);
             }
             case PORT: {
@@ -109,8 +108,8 @@ public class HostDecoder extends ReplayingDecoder<ReadState> {
                 byte[] remain = new byte[readableLength];
                 data.readBytes(remain, 0, readableLength);
                 model.setCacheData(remain);
-                logger.info("from: {} ,TSN: {}", ctx.channel().remoteAddress().toString(),
-                        ctx.channel().id().asLongText());
+                model.setTsn(ctx.channel().id().asLongText());
+                logger.info("from: {} ,TSN: {}", ctx.channel().remoteAddress().toString(), model.getTsn());
                 ctx.pipeline()
                         .addLast(BootContext.getApplicationContext().getBean("eventExecutors", EventLoopGroup.class),
                                 "proxyHandler", new ProxyHandler(model));
