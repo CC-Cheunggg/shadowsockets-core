@@ -9,7 +9,7 @@
 ### 项目使用条件
 
 ```
-在支持BBR加速的vps中的Linux系统中安装JDK 8.0+ 、安装BBR。
+在支持BBR加速的vps中的Linux系统中安装JDK 8.0+ 、安装BBR。（暂时不支持在 Windows 中部署）
 ```
 
 ### 安装
