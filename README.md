@@ -47,7 +47,7 @@
 
 * 1.7.0.Final
     * 修复小火箭不能连接的缺陷
-    * 新增了Chacha20Poly1305加密方式
+    * 增加AEAD加密 ：aes-256-gcm、chacha20-ietf-poly1305
 * 1.6.0.Final
     * 增加AEAD加密 ：aes-128-gcm
 * 1.5.0.Final
