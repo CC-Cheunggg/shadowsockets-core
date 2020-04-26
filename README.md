@@ -2,7 +2,7 @@
 
 > 维护了java版的 shadowsocks 实现
 
-[![]()]()
+[![]()](https://spdx.org/licenses/Apache-2.0.html)
 
 ## 使用指南
 
