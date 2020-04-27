@@ -1,5 +1,4 @@
 shadowsocks server（java实现）
-==========================
 
 > 维护了java版的 shadowsocks 服务端实现
 
