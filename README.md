@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Releases](https://img.shields.io/github/downloads/RPCheung/shadowsockets-core/total.svg)](https://github.com/RPCheung/shadowsockets-core/releases)
 
-## 功能
+## 特征
 
 - [x] TCP隧道（例如，使用iperf3进行基准测试）
 
@@ -14,7 +14,7 @@
 ### 项目使用条件
 
 ```
-在支持安装BBR加速的vps中使用。（暂时不支持在 Windows 中部署）
+请在支持安装BBR加速的vps中使用。（暂时不支持在 Windows 中部署）
 ```
 
 ### 安装
