@@ -51,7 +51,7 @@
 
 ## 贡献指南
 
-* 如有不足请提交 [issues](https://github.com/RPCheung/shadowsockets-core/issues/new)，作者会及时跟踪。
+* 如使用过程或代码编写上存在不足请提交 [issues](https://github.com/RPCheung/shadowsockets-core/issues/new)，作者会及时跟踪处理。
 
 ## 版本历史
 
