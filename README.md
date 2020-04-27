@@ -1,6 +1,7 @@
-# shadowsocks（java实现）
+shadowsocks server（java实现）
+==========================
 
-> 维护了java版的 shadowsocks 实现
+> 维护了java版的 shadowsocks 服务端实现
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Releases](https://img.shields.io/github/downloads/RPCheung/shadowsockets-core/total.svg)](https://github.com/RPCheung/shadowsockets-core/releases)
