@@ -5,6 +5,10 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Releases](https://img.shields.io/github/downloads/RPCheung/shadowsockets-core/total.svg)](https://github.com/RPCheung/shadowsockets-core/releases)
 
+## 功能
+
+- [x] TCP隧道（例如，使用iperf3进行基准测试）
+
 ## 使用指南
 
 ### 项目使用条件
@@ -44,7 +48,7 @@
 
 ## 贡献指南
 
-如有不足请提交 [issues](https://github.com/RPCheung/shadowsockets-core/issues/new)，作者会及时跟踪。
+* 如有不足请提交 [issues](https://github.com/RPCheung/shadowsockets-core/issues/new)，作者会及时跟踪。
 
 ## 版本历史
 
