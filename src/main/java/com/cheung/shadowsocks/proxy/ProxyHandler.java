@@ -5,6 +5,7 @@ import com.cheung.shadowsocks.encryption.CryptUtil;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import com.cheung.shadowsocks.model.SSModel;
 import com.cheung.shadowsocks.utils.BootContext;
+import com.cheung.shadowsocks.utils.ValidateUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -43,6 +44,10 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         Attribute<SSModel> ssModelAttribute = this.channelHandlerContext.channel().attr(ss_model);
         ssModelAttribute.setIfAbsent(ssModel);
         tsn.compareAndSet("", ssModel.getTsn());
+        String message = ValidateUtils.utils.validate(ssModel);
+        if (!"".equals(message)) {
+            throw new IllegalArgumentException(message);
+        }
         init(ssModel.getHost(), ssModel.getPort());
         sendData(ssModel.getCacheData(), Boolean.TRUE, ssModel.getTsn());
     }

@@ -39,6 +39,7 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
     compile 'org.apache.ant:ant:1.10.5'
     compile 'org.apache.commons:commons-exec:1.3'
+    compile 'org.hibernate.validator:hibernate-validator:6.1.4.Final'
     compile fileTree(dir: 'localLibs', include: ['*.jar'])
 
 
