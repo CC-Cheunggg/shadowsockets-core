@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Releases](https://img.shields.io/github/downloads/RPCheung/shadowsockets-core/total.svg)](https://github.com/RPCheung/shadowsockets-core/releases)
-
+[![Build Status](https://travis-ci.org/RPCheung/shadowsockets-core.svg?branch=master)](https://travis-ci.org/github/RPCheung/shadowsockets-core)
 ## 计划
 
 - [x] TCP隧道
