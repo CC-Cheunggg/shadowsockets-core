@@ -37,7 +37,6 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
                 ctx.channel().writeAndFlush(Unpooled.copiedBuffer(data));
             }
         }
-
     }
 
 
