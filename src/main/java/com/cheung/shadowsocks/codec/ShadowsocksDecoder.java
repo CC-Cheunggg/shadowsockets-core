@@ -15,6 +15,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.socks.SocksAddressType;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +53,23 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buff = (ByteBuf) msg;
-        ByteBuf data = Unpooled.copiedBuffer(CryptUtil.decrypt(_crypt, buff));
-        CryptUtil.releaseByteBufAllRefCnt(buff);
-        super.channelRead(ctx, data);
+        try {
+            ByteBuf data = Unpooled.copiedBuffer(CryptUtil.decrypt(_crypt, buff));
+            super.channelRead(ctx, data);
+        } finally {
+            CryptUtil.releaseByteBufAllRefCnt(buff);
+        }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error("decode error", cause);
+        ctx.close();
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf data, List<Object> out) throws Exception {
-
+        // 这个方法里面的 ByteBuf 会自动释放
         switch (state()) {
             case HOST_TYPE: {
                 hostType = SocksAddressType.valueOf(data.readByte());
@@ -67,6 +77,7 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
                         && (hostType != SocksAddressType.IPv6)
                         && (hostType != SocksAddressType.DOMAIN)) {
                     CryptUtil.releaseByteBufAllRefCnt(data);
+                    ctx.close();
                     logger.error("UNKNOWN HOST TYPE.");
                     return;
                 }
@@ -96,6 +107,7 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
                 if (hostType == SocksAddressType.UNKNOWN) {
                     logger.error("UNKNOWN HOST TYPE.");
                     CryptUtil.releaseByteBufAllRefCnt(data);
+                    ctx.close();
                     return;
                 }
                 checkpoint(ReadState.PORT);
