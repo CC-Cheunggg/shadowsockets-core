@@ -53,6 +53,7 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buff = (ByteBuf) msg;
         ByteBuf data = Unpooled.copiedBuffer(CryptUtil.decrypt(_crypt, buff));
+        CryptUtil.releaseByteBufAllRefCnt(buff);
         super.channelRead(ctx, data);
     }
 
