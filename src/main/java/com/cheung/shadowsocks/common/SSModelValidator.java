@@ -24,7 +24,7 @@ import javax.validation.Payload;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {MessageConstraintValidator.class})
+@Constraint(validatedBy = {SSModelConstraintValidator.class})
 public @interface SSModelValidator {
 
     String message() default "error";
