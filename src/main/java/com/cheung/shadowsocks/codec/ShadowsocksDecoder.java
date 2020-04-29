@@ -81,7 +81,7 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
                     logger.error("UNKNOWN HOST TYPE.");
                     return;
                 }
-                checkpoint(ReadState.HOST_TYPE);
+                checkpoint(ReadState.HOST_LENGTH);
             }
             case HOST_LENGTH: {
                 if (hostType == SocksAddressType.DOMAIN) {
