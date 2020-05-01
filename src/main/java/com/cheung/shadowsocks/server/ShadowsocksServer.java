@@ -45,6 +45,11 @@ public class ShadowsocksServer implements ApplicationListener {
                     .childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000)
                     .childOption(ChannelOption.AUTO_READ, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
+                    .childOption(ChannelOption.SO_LINGER, 2)
+                    .childOption(ChannelOption.SO_BACKLOG, 1024)
+                    .childOption(ChannelOption.SO_TIMEOUT, 120 * 1000)
+                    .childOption(ChannelOption.SO_SNDBUF, 128 * 5 * 120 * 1024)
+                    .childOption(ChannelOption.SO_RCVBUF, 128 * 5 * 120 * 1024)
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
             bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {

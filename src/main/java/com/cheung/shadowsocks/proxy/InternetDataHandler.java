@@ -63,15 +63,15 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
-        Channel channel = getClientProxyChannel(ctx).channel();
+        ChannelHandlerContext context = getClientProxyChannel(ctx);
 
         // 等待 发送缓冲区 的 数据发送完 为减少 Connection reset by peer
-        while ((channel != null) && (channel.isActive()) && (!(channel.unsafe().outboundBuffer().isEmpty()))) {
-            Thread.sleep(2000);
-        }
+//        while ((channel != null) && (channel.isActive()) && (!(channel.unsafe().outboundBuffer().isEmpty()))) {
+//            Thread.sleep(2000);
+//        }
 
         ctx.close();
-        getClientProxyChannel(ctx).close();
+        context.close();
         logger.info("InternetDataHandler channelInactive close  Interview address = {}", ctx.channel().remoteAddress());
     }
 
