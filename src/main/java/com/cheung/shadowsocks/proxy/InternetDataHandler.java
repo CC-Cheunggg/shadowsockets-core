@@ -64,11 +64,12 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 
         ChannelHandlerContext context = getClientProxyChannel(ctx);
+        Channel channel = context.channel();
 
         // 等待 发送缓冲区 的 数据发送完 为减少 Connection reset by peer
-//        while ((channel != null) && (channel.isActive()) && (!(channel.unsafe().outboundBuffer().isEmpty()))) {
-//            Thread.sleep(2000);
-//        }
+        while ((channel != null) && (channel.isActive()) && (!(channel.unsafe().outboundBuffer().isEmpty()))) {
+            Thread.sleep(2000);
+        }
 
         ctx.close();
         context.close();
