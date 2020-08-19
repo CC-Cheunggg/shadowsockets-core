@@ -28,8 +28,8 @@ public class ClientProxy {
                 .channel(EpollSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000)
-                .option(ChannelOption.SO_SNDBUF, 128 * 5 * 120 * 1024)
-                .option(ChannelOption.SO_RCVBUF, 128 * 5 * 120 * 1024)
+//                .option(ChannelOption.SO_SNDBUF, 128 * 5 * 120 * 1024)
+//                .option(ChannelOption.SO_RCVBUF, 128 * 5 * 120 * 1024)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.AUTO_READ, true);
     }

@@ -46,8 +46,8 @@ public class ShadowsocksServer implements ApplicationListener {
                     .childOption(ChannelOption.AUTO_READ, true)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     // [bandwidth] * [delay]
-                    .childOption(ChannelOption.SO_SNDBUF, 128 * 5 * 120 * 1024)
-                    .childOption(ChannelOption.SO_RCVBUF, 128 * 5 * 120 * 1024)
+//                    .childOption(ChannelOption.SO_SNDBUF, 128 * 5 * 120 * 1024)
+//                    .childOption(ChannelOption.SO_RCVBUF, 128 * 5 * 120 * 1024)
                     .childOption(ChannelOption.TCP_NODELAY, true);
 
             bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
