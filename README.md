@@ -69,4 +69,4 @@
 
 ## 授权协议
 
-这个项目遵循 Apache 协议， 请点击 [LICENSE](https://github.com/RPCheung/shadowsockets-core/blob/master/LICENSE) 了解更多细节。
+这个项目遵循 MIT 协议， 请点击 [LICENSE](https://github.com/RPCheung/shadowsockets-core/blob/master/LICENSE) 了解
