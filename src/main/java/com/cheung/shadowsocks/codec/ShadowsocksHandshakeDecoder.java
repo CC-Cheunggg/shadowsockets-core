@@ -15,7 +15,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.socks.SocksAddressType;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,23 +22,23 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.List;
 
-public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
+public class ShadowsocksHandshakeDecoder extends ReplayingDecoder<ReadState> {
 
-    private static Config config;
+    private static final Config config;
 
     static {
         config = ConfigXmlLoader.loader.load();
     }
 
-    private ICrypt _crypt = CryptFactory.factory.get(config.getMethod(), config.getPassword());
-    private SSModel model = new SSModel();
+    private final ICrypt _crypt = CryptFactory.factory.get(config.getMethod(), config.getPassword());
+    private final SSModel model = new SSModel();
     private byte domainLength;
     private SocksAddressType hostType;
 
 
-    private static final Logger logger = LoggerFactory.getLogger(ShadowsocksDecoder.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShadowsocksHandshakeDecoder.class);
 
-    public ShadowsocksDecoder() {
+    public ShadowsocksHandshakeDecoder() {
         super(ReadState.HOST_TYPE);
     }
 
@@ -115,19 +114,15 @@ public class ShadowsocksDecoder extends ReplayingDecoder<ReadState> {
             }
             case PORT: {
                 model.setPort(data.readShort());
-                checkpoint(ReadState.DATA);
-            }
-            case DATA: {
-                int readableLength = data.writerIndex() - data.readerIndex();
-                byte[] remain = new byte[readableLength];
-                data.readBytes(remain, 0, readableLength);
-                model.setCacheData(remain);
                 model.setTsn(ctx.channel().id().asLongText());
                 logger.info("from: {} ,TSN: {}", ctx.channel().remoteAddress().toString(), model.getTsn());
                 ctx.pipeline()
                         .addLast(BootContext.getApplicationContext().getBean("eventExecutors", EventLoopGroup.class),
                                 "proxyHandler", new ProxyHandler(model));
-                checkpoint(ReadState.HOST_TYPE);
+                checkpoint(ReadState.PAYLOAD);
+            }
+            case PAYLOAD: {
+                logger.info("已接收有效负载,正在进入 relay 阶段");
             }
         }
     }

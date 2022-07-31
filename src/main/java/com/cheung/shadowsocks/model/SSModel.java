@@ -15,12 +15,10 @@ import java.util.List;
 @SSModelValidator(message = "host and port cannot be empty")
 public class SSModel {
 
-    private ChannelHandlerContext channelHandlerContext;
-    private String tsn;
-    private ICrypt crypt;
-    private List<byte[]> data;
-    private byte[] cacheData;
-    private SocksAddressType hostType;
-    private String host;
-    private int port;
+    private volatile ChannelHandlerContext channelHandlerContext;
+    private volatile String tsn;
+    private volatile ICrypt crypt;
+    private volatile SocksAddressType hostType;
+    private volatile String host;
+    private volatile int port;
 }

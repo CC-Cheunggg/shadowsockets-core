@@ -8,17 +8,17 @@ import java.io.Serializable;
 public class Config implements Serializable {
 
 
-    private String ipAddr;
+    private volatile String ipAddr;
 
-    private String localIpAddr;
+    private volatile String localIpAddr;
 
-    private boolean track;
+    private volatile boolean track;
 
-    private int serverPort;
+    private volatile int serverPort;
 
-    private String method;
+    private volatile String method;
 
-    private String password;
+    private volatile String password;
 
 
 }

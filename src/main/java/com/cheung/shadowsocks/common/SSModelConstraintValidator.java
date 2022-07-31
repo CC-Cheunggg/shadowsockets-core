@@ -1,9 +1,8 @@
 package com.cheung.shadowsocks.common;
 
 import com.cheung.shadowsocks.model.SSModel;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class SSModelConstraintValidator implements ConstraintValidator<SSModelValidator, SSModel> {
 

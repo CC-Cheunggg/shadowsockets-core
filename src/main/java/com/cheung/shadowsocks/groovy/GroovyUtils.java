@@ -3,6 +3,7 @@ package com.cheung.shadowsocks.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import org.apache.commons.io.FileUtils;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
