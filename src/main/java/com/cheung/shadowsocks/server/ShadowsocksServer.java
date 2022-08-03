@@ -1,6 +1,6 @@
 package com.cheung.shadowsocks.server;
 
-import com.cheung.shadowsocks.codec.ShadowsocksHandshakeDecoder;
+import com.cheung.shadowsocks.codec.ShadowsocksDecoder;
 import com.cheung.shadowsocks.config.Config;
 import com.cheung.shadowsocks.config.ConfigXmlLoader;
 import io.netty.bootstrap.ServerBootstrap;
@@ -53,7 +53,7 @@ public class ShadowsocksServer implements ApplicationListener {
             bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel socketChannel) {
-                    socketChannel.pipeline().addLast("shadowsocksDecoder", new ShadowsocksHandshakeDecoder());
+                    socketChannel.pipeline().addLast("shadowsocksDecoder", new ShadowsocksDecoder());
                 }
             });
 

@@ -14,7 +14,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +24,14 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * 接受客户端代理发送来的消息
  */
-@Slf4j
 public class ProxyHandler extends ChannelInboundHandlerAdapter {
 
+    private static Logger logger = LoggerFactory.getLogger(ProxyHandler.class);
     private final ICrypt _crypt;
     private final AtomicReference<Channel> remoteChannel = new AtomicReference<>(null);
-    private final ChannelHandlerContext channelHandlerContext;
+    private ChannelHandlerContext channelHandlerContext;
     private final AtomicReference<String> tsn = new AtomicReference<>("");
+    private final List<byte[]> cache = new CopyOnWriteArrayList<>();
 
 
     public ProxyHandler(SSModel ssModel) {
@@ -39,6 +39,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
         // 防止 channel 断开 无法 释放 byteBuf
         this._crypt = ssModel.getCrypt();
         this.channelHandlerContext = ssModel.getChannelHandlerContext();
+        ssModel.setData(cache);
         AttributeKey<SSModel> ss_model = AttributeKey.valueOf("ss.model");
         Attribute<SSModel> ssModelAttribute = this.channelHandlerContext.channel().attr(ss_model);
         ssModelAttribute.setIfAbsent(ssModel);
@@ -48,6 +49,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             throw new IllegalArgumentException(message);
         }
         init(ssModel.getHost(), ssModel.getPort());
+        sendData(ssModel.getCacheData(), Boolean.TRUE, ssModel.getTsn());
     }
 
     @Override
@@ -73,7 +75,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
                 }
             });
         } catch (Exception e) {
-            log.error("connect intenet error", e);
+            logger.error("connect intenet error", e);
         }
     }
 
@@ -92,7 +94,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        log.info("ClientProxyHandler channelInactive close client address={}", ctx.channel().remoteAddress());
+        logger.info("ClientProxyHandler channelInactive close client address={}", ctx.channel().remoteAddress());
         ctx.close();
         if (remoteChannel.get() != null) {
             remoteChannel.get().close();
@@ -101,7 +103,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("ClientProxyHandler error client address=" + ctx.channel().remoteAddress(), cause);
+        logger.error("ClientProxyHandler error client address=" + ctx.channel().remoteAddress(), cause);
         ctx.close();
         if (remoteChannel.get() != null) {
             remoteChannel.get().close();
@@ -110,12 +112,14 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
 
     private void sendData(byte[] data, boolean isFlush, String channelId) {
         if (remoteChannel.get() != null && remoteChannel.get().isActive()) {
-            log.info("to: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
+            logger.info("to: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
             if (isFlush) {
                 remoteChannel.get().writeAndFlush(Unpooled.copiedBuffer(data));
             } else {
                 remoteChannel.get().write(Unpooled.copiedBuffer(data));
             }
+        } else {
+            cache.add(data);
         }
     }
 
