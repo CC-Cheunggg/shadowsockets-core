@@ -4,6 +4,7 @@ import com.cheung.shadowsocks.encryption.CryptUtil;
 import com.cheung.shadowsocks.encryption.ICrypt;
 import com.cheung.shadowsocks.model.SSModel;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -52,7 +53,7 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         Channel channel = clientProxyChannel.channel();
 
         if (channel != null && channel.isActive()) {
-            ByteBuf directBuffer = Unpooled.directBuffer();
+            ByteBuf directBuffer = PooledByteBufAllocator.DEFAULT.directBuffer();
             channel.writeAndFlush(directBuffer.writeBytes(deData));
         } else {
             ctx.close();

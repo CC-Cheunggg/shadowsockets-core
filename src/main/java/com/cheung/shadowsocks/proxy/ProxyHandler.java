@@ -7,6 +7,7 @@ import com.cheung.shadowsocks.model.SSModel;
 import com.cheung.shadowsocks.utils.BootContext;
 import com.cheung.shadowsocks.utils.ValidateUtils;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -113,7 +114,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     private void sendData(byte[] data, boolean isFlush, String channelId) {
         if (remoteChannel.get() != null && remoteChannel.get().isActive()) {
             logger.info("to: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
-            ByteBuf directBuffer = Unpooled.directBuffer();
+            ByteBuf directBuffer = PooledByteBufAllocator.DEFAULT.directBuffer();
             if (isFlush) {
                 remoteChannel.get().writeAndFlush(directBuffer.writeBytes(data));
             } else {
