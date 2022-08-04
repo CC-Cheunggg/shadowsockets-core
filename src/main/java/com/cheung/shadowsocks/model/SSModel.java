@@ -19,7 +19,7 @@ public class SSModel {
     private String tsn;
     private ICrypt crypt;
     private List<byte[]> data;
-    private byte[] cacheData;
+    private byte[] payload;
     private SocksAddressType hostType;
     private String host;
     private int port;

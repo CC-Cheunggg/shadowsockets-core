@@ -52,7 +52,8 @@ public class InternetDataHandler extends ChannelInboundHandlerAdapter {
         Channel channel = clientProxyChannel.channel();
 
         if (channel != null && channel.isActive()) {
-            channel.writeAndFlush(Unpooled.copiedBuffer(deData));
+            ByteBuf directBuffer = Unpooled.directBuffer();
+            channel.writeAndFlush(directBuffer.writeBytes(deData));
         } else {
             ctx.close();
         }

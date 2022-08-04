@@ -1,5 +1,6 @@
 package com.cheung.shadowsocks.encryption;
 
+import io.netty.buffer.Unpooled;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.CipherParameters;
 import org.bouncycastle.crypto.InvalidCipherTextException;

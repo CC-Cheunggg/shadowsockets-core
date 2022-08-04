@@ -49,7 +49,7 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
             throw new IllegalArgumentException(message);
         }
         init(ssModel.getHost(), ssModel.getPort());
-        sendData(ssModel.getCacheData(), Boolean.TRUE, ssModel.getTsn());
+        sendData(ssModel.getPayload(), Boolean.TRUE, ssModel.getTsn());
     }
 
     @Override
@@ -113,10 +113,11 @@ public class ProxyHandler extends ChannelInboundHandlerAdapter {
     private void sendData(byte[] data, boolean isFlush, String channelId) {
         if (remoteChannel.get() != null && remoteChannel.get().isActive()) {
             logger.info("to: {} ,TSN: {}", remoteChannel.get().remoteAddress().toString(), channelId);
+            ByteBuf directBuffer = Unpooled.directBuffer();
             if (isFlush) {
-                remoteChannel.get().writeAndFlush(Unpooled.copiedBuffer(data));
+                remoteChannel.get().writeAndFlush(directBuffer.writeBytes(data));
             } else {
-                remoteChannel.get().write(Unpooled.copiedBuffer(data));
+                remoteChannel.get().write(directBuffer.writeBytes(data));
             }
         } else {
             cache.add(data);
